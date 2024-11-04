@@ -8,6 +8,9 @@ This app runs a Streamlit application that processes images from Google Cloud St
 ## Step 1. Start the Google Cloud Shell 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FMichaelAkridge-NOAA%2FFish-or-No-Fish-Detector&cloudshell_git_branch=MOUSS_2016&cloudshell_print=cloud-shell-readme.txt&cloudshell_workspace=google-cloud-shell&cloudshell_tutorial=TUTORIAL.md)
 
+# Screenshot
+![GIF description](./docs/processing.gif)
+
 ## Step 2: This will ask to clone the repo:
 - Github Repo: https://github.com/MichaelAkridge-NOAA/Fish-or-No-Fish-Detector/tree/MOUSS_2016/google-cloud-shell
 
