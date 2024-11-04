@@ -15,12 +15,12 @@ A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 
 | Category                                         | Notebook Name                                      | Description                                                                               | Deploy  | 
 | ------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------|
-| Data Preparation                                  | **Data Prep**                                      | Prepares training and testing datasets, and verifies metadata                             | [![Open In Colab][colablogo]] | 
-| Model Training                                    | **Train YOLO11 Model**                            | Configures parameters and trains YOLOv11 models                                           | [![Open In Colab][colablogo]]  | 
-| Model Training                                    | **Train YOLO11 Segment Model**                    | Configures parameters and trains YOLOv11 segmentation models                              | [![Open In Colab][colablogo]]  | 
-| Model Training                                    | **Train YOLOv8 Model**                             | Configures parameters and trains YOLOv8 models                                            | [![Open In Colab][colablogo]] | 
-| Model Evaluation                                  | **Evaluate Models**                                | Generates metrics and performs comprehensive model testing                                | [![Open In Colab][colablogo]]|
-| Model Deployment                                  | **Publish Models**                                 | Publishes trained models to public repositories for community access                       | [![Open In Colab][colablogo]]  | 
+| Data Preparation                                  | **Data Prep**                                      | Prepares training and testing datasets, and verifies metadata                             | placeholder| 
+| Model Training                                    | **Train YOLO11 Model**                            | Configures parameters and trains YOLOv11 models                                           | placeholder  | 
+| Model Training                                    | **Train YOLO11 Segment Model**                    | Configures parameters and trains YOLOv11 segmentation models                              | placeholder | 
+| Model Training                                    | **Train YOLOv8 Model**                             | Configures parameters and trains YOLOv8 models                                            |placeholder| 
+| Model Evaluation                                  | **Evaluate Models**                                | Generates metrics and performs comprehensive model testing                                | placeholder|
+| Model Deployment                                  | **Publish Models**                                 | Publishes trained models to public repositories for community access                       | placeholder  | 
 
 ----------
 #### Disclaimer
