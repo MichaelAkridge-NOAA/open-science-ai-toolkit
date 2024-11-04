@@ -3,16 +3,14 @@ Open source suite of tools, workflows, and processes designed to accelerate Open
 
 ### Overview
 ```mermaid
-flowchart TD
-  A[Data Collection] --> B[Data Annotation]
-  B --> C[Data Preprocessing]
-  C --> D[Model Training]
+flowchart LR
+  ABC[Data Preparation] --> D[Model Training]
   D --> E[Model Evaluation]
   E --> F{Satisfactory Performance?}
   F -->|Yes| G[Model Deployment]
   F -->|No| D
   G --> H[Model Monitoring]
-  H --> C
+  H --> ABC
 ```
 
 ### Notebooks
