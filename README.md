@@ -2,8 +2,20 @@
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
 
 ### Overview
-The toolkit provides scripts, applications, and interactive notebooks to facilitate data preparation, model training, evaluation, and deployment, with upcoming features like multi-scale inference and more.
+The toolkit provides scripts, apps, and interactive python notebooks to facilitate data prep, model training, evaluation, and deployment.
 
+```mermaid
+flowchart TD
+  A[Data Collection] --> B[Data Annotation]
+  B --> C[Data Preprocessing]
+  C --> D[Model Training]
+  D --> E[Model Evaluation]
+  E --> F{Satisfactory Performance?}
+  F -->|Yes| G[Model Deployment]
+  F -->|No| D
+  G --> H[Model Monitoring]
+  H --> C
+```
 ### Scripts
 *Placeholder for various scripts that automate critical tasks.*
 
