@@ -4,7 +4,11 @@ Open source suite of tools, workflows, and processes designed to accelerate Open
 ### Overview
 ```mermaid
 flowchart LR
-  ABC[Data Preparation] --> D[Model Training]
+  subgraph ABC[Data Preparation]
+    A1[Data Collection] --> A2[Data Annotation]
+    A2 --> A3[Data Preprocessing]
+  end
+  ABC --> D[Model Training]
   D --> E[Model Evaluation]
   E --> F{Satisfactory Performance?}
   F -->|Yes| G[Model Deployment]
