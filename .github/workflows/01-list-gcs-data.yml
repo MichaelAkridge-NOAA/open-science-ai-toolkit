@@ -1,5 +1,8 @@
 name: 01 | Fetch and Save GCS Prefixes 
 on:
+  push:
+    branches:
+      - gh-pages  # Trigger on updates to the gh-pages branch
   workflow_dispatch:
 jobs:
   fetch-gcs-prefixes:
