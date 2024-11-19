@@ -31,16 +31,27 @@ jobs:
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
-          # Recursive function to fetch nested prefixes with depth limit
+          # Recursive function to fetch nested prefixes with exclusions
           fetch_prefixes() {
             local prefix=$1
             local depth=$2
-            local max_depth=6  # Set your maximum depth limit here
+            local max_depth=5  # Set your maximum depth limit here
 
             if [ "$depth" -ge "$max_depth" ]; then
               echo "Reached max depth for $prefix, skipping deeper fetches."
               return
             fi
+
+            # List of excluded folders
+            excluded_folders=("raw" "images" "labels" "logs" "database")
+
+            # Check if the current prefix matches any excluded folder
+            for excluded in "${excluded_folders[@]}"; do
+              if [[ "$prefix" == *"/$excluded/"* ]]; then
+                echo "Skipping excluded folder $prefix."
+                return
+              fi
+            done
 
             echo "Fetching prefixes for $prefix at depth $depth"
 
@@ -81,5 +92,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json debug-response.json
-          git commit -m "Updated all nested prefixes with depth control" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with exclusion logic" || echo "No changes to commit"
           git push origin gh-pages
