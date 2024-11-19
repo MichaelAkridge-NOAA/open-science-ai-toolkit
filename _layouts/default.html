@@ -8,6 +8,13 @@
     body {
       font-family: Arial, sans-serif;
     }
+    #breadcrumbs {
+      margin-bottom: 20px;
+    }
+    #breadcrumbs a {
+      text-decoration: none;
+      color: #0073e6;
+    }
     ul {
       list-style-type: none;
       padding-left: 20px;
@@ -39,27 +46,37 @@
       padding: 2px 5px;
       border-radius: 4px;
     }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 4px solid #0073e6;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <h1>NODD AI Dataset Viewer</h1>
+  <div id="breadcrumbs">Home</div>
   <div id="bucket-contents">Loading...</div>
 
   <script>
-    const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json'; // Replace with the actual path to your JSON file
+    const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/gh-pages/nested-prefixes.json'; // Replace with actual path
+    let currentPath = []; // Keep track of breadcrumbs
 
     // Fetch and render the bucket data
     fetch(jsonUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch JSON data');
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-        const container = document.getElementById('bucket-contents');
-        container.innerHTML = ''; // Clear the "Loading..." message
-        renderTree(data[0], container); // Render the tree starting from the root node
+        currentPath = [{ name: "Home", prefix: null }];
+        renderTree(data[0], document.getElementById('bucket-contents'));
+        updateBreadcrumbs();
       })
       .catch(error => {
         console.error('Error fetching JSON:', error);
@@ -68,6 +85,7 @@
 
     // Function to render folders and files recursively
     function renderTree(node, container) {
+      container.innerHTML = '';
       const ul = document.createElement('ul');
 
       node.prefixes?.forEach(prefix => {
@@ -75,50 +93,21 @@
         const span = document.createElement('span');
         span.textContent = prefix.split('/').filter(Boolean).pop(); // Show last folder name
         span.classList.add('folder');
-        span.onclick = () => toggleChildren(li);
-
-        const apiLink = document.createElement('a');
-        apiLink.textContent = "API Link";
-        apiLink.href = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${prefix}`;
-        apiLink.target = "_blank";
-        apiLink.classList.add('api-link');
-
-        const gsutilCmd = document.createElement('span');
-        gsutilCmd.classList.add('gsutil-command');
-        const command = `gsutil -m cp -r gs://nmfs_odp_pifsc/${prefix} .`;
-        gsutilCmd.textContent = `gsutil command: ${command}`;
-
-        const copyBtn = document.createElement('button');
-        copyBtn.textContent = "Copy";
-        copyBtn.classList.add('copy-btn');
-        copyBtn.onclick = () => copyToClipboard(command);
-
-        const childContainer = document.createElement('div');
-        childContainer.classList.add('hidden');
+        span.onclick = () => {
+          currentPath.push({ name: span.textContent, prefix });
+          updateBreadcrumbs();
+          renderChild(prefix, li);
+        };
 
         li.appendChild(span);
-        li.appendChild(apiLink);
-        li.appendChild(gsutilCmd);
-        li.appendChild(copyBtn);
-        li.appendChild(childContainer);
         ul.appendChild(li);
-
-        // Fetch nested data for this prefix and render lazily
-        span.onclick = () => {
-          if (childContainer.innerHTML === '') {
-            const nestedNode = data.find(item => item.prefix === prefix);
-            if (nestedNode) {
-              renderTree(nestedNode, childContainer);
-            }
-          }
-        };
       });
 
       node.files?.forEach(file => {
         const li = document.createElement('li');
         const fileLink = document.createElement('a');
         fileLink.textContent = file.split('/').filter(Boolean).pop(); // Show file name
-        fileLink.href = `https://storage.googleapis.com/${file}`; // Direct download link
+        fileLink.href = `https://storage.googleapis.com/${file}`;
         fileLink.target = '_blank';
         fileLink.classList.add('file');
         li.appendChild(fileLink);
@@ -128,20 +117,48 @@
       container.appendChild(ul);
     }
 
-    function toggleChildren(li) {
-      const childContainer = li.querySelector('div');
-      if (childContainer.classList.contains('hidden')) {
-        childContainer.classList.remove('hidden');
-      } else {
-        childContainer.classList.add('hidden');
-      }
+    // Function to render child nodes
+    function renderChild(prefix, container) {
+      container.innerHTML = '<div class="spinner"></div>';
+      fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+          const nestedNode = data.find(item => item.prefix === prefix);
+          if (nestedNode) {
+            renderTree(nestedNode, container);
+          } else {
+            container.innerHTML = 'No additional data available.';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching child data:', error);
+          container.innerHTML = 'Failed to load data.';
+        });
     }
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
-      }, () => {
-        alert('Failed to copy.');
+    // Function to update breadcrumbs
+    function updateBreadcrumbs() {
+      const breadcrumbDiv = document.getElementById('breadcrumbs');
+      breadcrumbDiv.innerHTML = '';
+      currentPath.forEach((item, index) => {
+        const link = document.createElement('a');
+        link.textContent = item.name;
+        link.href = '#';
+        link.onclick = (e) => {
+          e.preventDefault();
+          currentPath = currentPath.slice(0, index + 1);
+          updateBreadcrumbs();
+          if (item.prefix) {
+            const node = data.find(d => d.prefix === item.prefix);
+            renderTree(node, document.getElementById('bucket-contents'));
+          } else {
+            renderTree(data[0], document.getElementById('bucket-contents'));
+          }
+        };
+        breadcrumbDiv.appendChild(link);
+        if (index < currentPath.length - 1) {
+          breadcrumbDiv.appendChild(document.createTextNode(' > '));
+        }
       });
     }
   </script>
