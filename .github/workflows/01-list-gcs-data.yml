@@ -69,11 +69,14 @@ jobs:
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
             # Append the data for the current prefix
+            if [ -s nested-prefixes-temp.json ]; then
+              echo "," >> nested-prefixes-temp.json
+            fi
             {
               echo "{\"prefix\": \"$prefix\","
               echo " \"prefixes\": $(echo "$prefixes" | jq -R . | jq -s .),"
               echo " \"files\": $(echo "$files" | jq -R . | jq -s .)"
-              echo "},"
+              echo "}"
             } >> nested-prefixes-temp.json
 
             # Recurse into each prefix
@@ -87,8 +90,8 @@ jobs:
           fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
           echo "]" >> nested-prefixes-temp.json
 
-          # Remove trailing commas and format the JSON file
-          jq '.' nested-prefixes-temp.json > nested-prefixes.json
+          # Validate and format the JSON
+          jq -s '.' nested-prefixes-temp.json > nested-prefixes.json
           rm -f nested-prefixes-temp.json
 
           # Validate JSON structure
