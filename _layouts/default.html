@@ -13,7 +13,6 @@
   {% seo %}
   {% include head-custom.html %}
   <script src="https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/assets/js/loadList.js"></script>
-  <title>GCS Bucket File Listing</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <style>
     /* Optional inline styles for better presentation */
@@ -68,18 +67,12 @@
   <main>
     <section id="content">
       <h2>File Listing</h2>
-      <ul id="listing">Loading...</ul>
+      <div id="listing">Loading...</div>
     </section>
   </main>
 
-  <footer>
-    <p style="text-align: center; font-size: 12px; color: #666;">Generated with GitHub Pages</p>
-  </footer>
-
   <script>
     var API_ENDPOINT = 'https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=PIFSC/ESD/ARP/pifsc-ai-data-repository/';
-    var GCSB_SORT = 'DEFAULT';
-    var EXCLUDE_FILE = [];
     var GCSB_ROOT_DIR = '';
     var AUTO_TITLE = true;
   </script>

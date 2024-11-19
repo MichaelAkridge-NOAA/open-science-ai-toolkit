@@ -1,8 +1,6 @@
 // Configuration for GCS bucket listing
 var API_ENDPOINT = 'https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o';
-var GCSB_SORT = 'DEFAULT'; // Sorting options
-var EXCLUDE_FILE = []; // Files to exclude
-var GCSB_ROOT_DIR = ''; // Root directory, if needed
+var GCSB_ROOT_DIR = ''; // Root directory
 var AUTO_TITLE = true;
 
 // Set the document title automatically
@@ -10,16 +8,13 @@ if (AUTO_TITLE) {
   document.title = location.hostname;
 }
 
-// Fetch and display bucket data using JSON API
-function getBucketData(pageToken = '') {
-  let url = `${API_ENDPOINT}?prefix=${GCSB_ROOT_DIR}&delimiter=/`;
-  if (pageToken) {
-    url += `&pageToken=${pageToken}`;
-  }
+// Fetch and display bucket data for the specified directory
+function getBucketData(directory = '', isSubdirectory = false) {
+  const url = `${API_ENDPOINT}?prefix=${directory}&delimiter=/`;
 
   // Display a loading message
   const listingElement = document.getElementById('listing');
-  if (!pageToken) {
+  if (!isSubdirectory) {
     listingElement.innerHTML = '<p>Loading files...</p>';
   }
 
@@ -29,14 +24,10 @@ function getBucketData(pageToken = '') {
       return response.json();
     })
     .then((data) => {
-      const files = data.items || [];
-      const directories = data.prefixes || [];
-
-      renderListing(files, directories);
-
-      // If there's a nextPageToken, fetch more results
-      if (data.nextPageToken) {
-        getBucketData(data.nextPageToken);
+      if (isSubdirectory) {
+        renderSubdirectory(data, directory);
+      } else {
+        renderListing(data);
       }
     })
     .catch((error) => {
@@ -45,61 +36,60 @@ function getBucketData(pageToken = '') {
     });
 }
 
-// Render file and directory listing
-function renderListing(files, directories) {
+// Render the root listing (directories and top-level files)
+function renderListing(data) {
   const listingElement = document.getElementById('listing');
-  let content = listingElement.innerHTML === '<p>Loading files...</p>' ? '' : listingElement.innerHTML;
+  let content = '<ul>';
 
   // Add directories
-  directories.forEach((dir) => {
-    content += `<li class="directory"><a href="${dir.mediaLink}" target="_blank">${dir.name}/</a></li>`;
-  });
-
-  // Sort files if a sort option is selected
-  if (GCSB_SORT !== 'DEFAULT') {
-    files.sort((a, b) => sortFiles(a, b, GCSB_SORT));
+  if (data.prefixes) {
+    data.prefixes.forEach((prefix) => {
+      const dirName = prefix.replace(GCSB_ROOT_DIR, '').replace(/\/$/, '');
+      content += `<li class="directory"><a href="#" onclick="getBucketData('${prefix}', true); return false;">${dirName}/</a></li>`;
+    });
   }
 
   // Add files
-  files.forEach((file) => {
-    if (!EXCLUDE_FILE.includes(file.name)) {
-      const size = bytesToHumanReadable(file.size);
-      content += `<li class="file"><a href="${file.mediaLink}" target="_blank">${file.name}</a> (${size})</li>`;
-    }
-  });
+  if (data.items) {
+    data.items.forEach((item) => {
+      content += `<li class="file"><a href="${item.mediaLink}" target="_blank">${item.name.replace(GCSB_ROOT_DIR, '')}</a></li>`;
+    });
+  }
 
+  content += '</ul>';
   listingElement.innerHTML = content;
 }
 
-// Sorting logic for files
-function sortFiles(a, b, sortOption) {
-  switch (sortOption) {
-    case 'OLD2NEW':
-      return new Date(a.updated) - new Date(b.updated);
-    case 'NEW2OLD':
-      return new Date(b.updated) - new Date(a.updated);
-    case 'A2Z':
-      return a.name.localeCompare(b.name);
-    case 'Z2A':
-      return b.name.localeCompare(a.name);
-    case 'BIG2SMALL':
-      return parseInt(b.size, 10) - parseInt(a.size, 10);
-    case 'SMALL2BIG':
-      return parseInt(a.size, 10) - parseInt(b.size, 10);
-    default:
-      return 0;
-  }
-}
+// Render the contents of a subdirectory
+function renderSubdirectory(data, directory) {
+  const subListingId = `sub-${directory}`;
+  let content = `<ul id="${subListingId}">`;
 
-// Convert bytes to a human-readable format
-function bytesToHumanReadable(sizeInBytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let index = 0;
-  while (sizeInBytes >= 1024 && index < units.length - 1) {
-    sizeInBytes /= 1024;
-    index++;
+  // Add directories
+  if (data.prefixes) {
+    data.prefixes.forEach((prefix) => {
+      const dirName = prefix.replace(directory, '').replace(/\/$/, '');
+      content += `<li class="directory"><a href="#" onclick="getBucketData('${prefix}', true); return false;">${dirName}/</a></li>`;
+    });
   }
-  return `${sizeInBytes.toFixed(1)} ${units[index]}`;
+
+  // Add files
+  if (data.items) {
+    data.items.forEach((item) => {
+      content += `<li class="file"><a href="${item.mediaLink}" target="_blank">${item.name.replace(directory, '')}</a></li>`;
+    });
+  }
+
+  content += '</ul>';
+
+  // Add the subdirectory content below the clicked directory
+  const existingElement = document.getElementById(subListingId);
+  if (existingElement) {
+    existingElement.remove(); // Remove if already expanded
+  } else {
+    const parentElement = document.querySelector(`a[href="#"][onclick*="${directory}"]`).parentElement;
+    parentElement.insertAdjacentHTML('beforeend', content);
+  }
 }
 
 // Initialize listing on page load
