@@ -31,10 +31,18 @@ jobs:
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
-          # Recursive function to fetch nested prefixes
+          # Recursive function to fetch nested prefixes with depth limit
           fetch_prefixes() {
             local prefix=$1
-            echo "Fetching prefixes for $prefix"
+            local depth=$2
+            local max_depth=6  # Set your maximum depth limit here
+
+            if [ "$depth" -ge "$max_depth" ]; then
+              echo "Reached max depth for $prefix, skipping deeper fetches."
+              return
+            fi
+
+            echo "Fetching prefixes for $prefix at depth $depth"
 
             # Fetch current level
             response=$(aws s3api list-objects-v2 \
@@ -57,13 +65,13 @@ jobs:
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
-              fetch_prefixes "$sub_prefix"
+              fetch_prefixes "$sub_prefix" $((depth + 1))
             done
           }
 
           # Initialize output file
           echo "[" > nested-prefixes.json
-          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
           echo "]" >> nested-prefixes.json
 
       - name: Commit and push changes
@@ -73,5 +81,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json debug-response.json
-          git commit -m "Updated all nested prefixes and debug response" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with depth control" || echo "No changes to commit"
           git push origin gh-pages
