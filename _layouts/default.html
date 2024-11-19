@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}" media="screen" type="text/css">
+  <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <![endif]-->
+  {% seo %}
+  {% include head-custom.html %}
+  <script src="{{ '/assets/js/loadList.js' | relative_url }}"></script>
+  <title>GCS Bucket File Listing</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <style>
+    /* Optional inline styles for better presentation */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    header {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    header p {
+      margin: 5px 0 0;
+      font-size: 14px;
+    }
+    main {
+      padding: 20px;
+    }
+    #listing ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    #listing li {
+      margin: 5px 0;
+    }
+    #listing li a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+    #listing li a:hover {
+      text-decoration: underline;
+    }
+    #listing .directory a {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+    <header>
+      <div class="inner">
+        <a href="{{ '/' | absolute_url }}">
+          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+        </a>
+        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+        {% if site.github.is_project_page %}
+          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
+        {% endif %}
+      </div>
+    </header>
+  <main>
+    <section id="content">
+      <h2>File Listing</h2>
+      <div id="listing">Loading...</div>
+    </section>
+  </main>
+
+  <footer>
+    <p style="text-align: center; font-size: 12px; color: #666;">Generated with GitHub Pages</p>
+  </footer>
+
+  <!-- Include the updated loadList.js -->
+  <script>
+    // Configuration for bucket listing
+    var BUCKET_URL = 'https://storage.googleapis.com/nmfs_odp_pifsc';
+    var GCSB_SORT = 'NEW2OLD'; // Sorting options: DEFAULT, NEW2OLD, OLD2NEW, A2Z, Z2A, BIG2SMALL, SMALL2BIG
+    var EXCLUDE_FILE = []; // Add file names to exclude
+    var GCSB_ROOT_DIR = ''; // Specify a root directory if needed
+    var AUTO_TITLE = true; // Automatically set page title
+    var GCSBL_IGNORE_PATH = false; // Ignore path in URL
+  </script>
+  <script src="/assets/js/loadList.js"></script>
+</body>
+</html>

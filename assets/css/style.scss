@@ -1,0 +1,102 @@
+---
+---
+
+@import 'jekyll-theme-architect';
+/* Base style for smaller screens */
+header h1 {
+    width: 100%; /* Full width on smaller screens */
+}
+
+/* Adjustments for larger screens */
+@media (min-width: 768px) { /* Common breakpoint for tablets */
+    header h1 {
+        width: 750px; /* Fixed width for larger screens */
+    }
+}
+
+.inner {
+    width: 100%; /* Full width on smaller screens */
+}
+
+/* Adjustments for larger screens */
+@media (min-width: 1080px) { /* Breakpoint for larger screens */
+    .inner {
+        width: 1080px; /* Fixed width for desktops */
+    }
+}
+
+
+header {
+    padding-top: 10px;
+    padding-bottom: 10px;}
+
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        line-height: 1.6;
+    }
+    label {
+        display: block;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+    }
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    pre {
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        padding: 10px;
+        overflow: auto;
+    }
+
+  input, select, textarea {
+    width: 100%;         /* Ensures full width */
+    padding: 8px;        /* Padding for better text visibility */
+    margin-top: 5px;     /* Margin for spacing between label and input */
+    font-size: 16px;     /* Increase font size for better readability */
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+}
+    #advancedSettings {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        display: none;
+    }
+  .input-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: 10px; /* Adds spacing between the input fields */
+}
+
+.input-group:last-child {
+    margin-right: 0; /* Removes margin from the last input group to align properly */
+}
+
+input {
+    padding: 8px;
+    margin-top: 5px; /* Space between label and input */
+    width: 100%; /* Full width of the container */
+}
+
