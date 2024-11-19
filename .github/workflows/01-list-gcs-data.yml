@@ -1,4 +1,4 @@
-name: 01 | Fetch and Save GCS Prefixes  
+name: 01 | Fetch and Save GCS Prefixes
 on:
   push:
     branches:
@@ -43,12 +43,17 @@ jobs:
               --delimiter / \
               --endpoint-url https://storage.googleapis.com)
 
-            # Parse prefixes and files
-            prefixes=$(echo "$response" | jq -r '.CommonPrefixes[].Prefix // empty')
-            files=$(echo "$response" | jq -r '.Contents[].Key // empty')
+            # Debug: Save the response for inspection
+            echo "$response" | jq . > debug-response.json
+
+            # Parse prefixes (handle null gracefully)
+            prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
+
+            # Parse files (handle null gracefully)
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
             # Save data
-            echo "{\"prefix\": \"$prefix\", \"prefixes\": [${prefixes}], \"files\": [${files}]}" >> nested-prefixes.json
+            echo "{\"prefix\": \"$prefix\", \"prefixes\": [$(echo "$prefixes" | jq -R . | jq -s .)], \"files\": [$(echo "$files" | jq -R . | jq -s .)]}" >> nested-prefixes.json
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -67,6 +72,6 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes" || echo "No changes to commit"
+          git add nested-prefixes.json debug-response.json
+          git commit -m "Updated all nested prefixes and debug response" || echo "No changes to commit"
           git push origin gh-pages
