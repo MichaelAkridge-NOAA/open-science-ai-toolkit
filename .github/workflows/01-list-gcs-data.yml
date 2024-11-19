@@ -1,28 +1,48 @@
-name: 01 | Fetch and Save GCS Prefixes
+name: 01 | Fetch and Save GCS Prefixes 
 on:
   workflow_dispatch:
 jobs:
   fetch-gcs-prefixes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allow pushing changes to the repository
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Fetch GCS bucket prefixes
-        env:
-          GCS_API_KEY: ${{ secrets.GCS_API_KEY }}
+      - name: Install AWS CLI
         run: |
-          echo "Fetching GCS bucket prefixes for PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Fetch GCS bucket prefixes using HMAC keys
+        env:
+          GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
+          GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Configuring AWS CLI for GCS"
           
+          # Configure AWS CLI for GCS
+          aws configure set aws_access_key_id $GCS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
+          aws configure set default.region us-east-1
+
+          echo "Fetching GCS bucket prefixes for PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+
           # Fetch and save JSON data with only prefixes
-          curl -L \
-            "https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=PIFSC/ESD/ARP/pifsc-ai-data-repository/&delimiter=/&key=$GCS_API_KEY" \
-            > buckets.json
+          aws s3api list-objects-v2 \
+            --bucket nmfs_odp_pifsc \
+            --prefix PIFSC/ESD/ARP/pifsc-ai-data-repository/ \
+            --delimiter / \
+            --endpoint-url https://storage.googleapis.com \
+            > prefixes.json
 
       - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Default GitHub token
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add buckets.json
+          git add prefixes.json
           git commit -m "Updated GCS bucket prefixes" || echo "No changes to commit"
-          git push
+          git push origin gh-pages
