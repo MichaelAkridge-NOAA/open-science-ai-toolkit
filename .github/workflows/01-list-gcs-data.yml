@@ -31,6 +31,10 @@ jobs:
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
+          # Temporary file to hold JSON objects
+          tmp_file="nested-prefixes-temp.json"
+          output_file="nested-prefixes.json"
+
           # Recursive function to fetch nested prefixes with exclusions
           fetch_prefixes() {
             local prefix=$1
@@ -68,16 +72,14 @@ jobs:
             # Parse files (handle null gracefully)
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
-            # Append the data for the current prefix
-            if [ -s nested-prefixes-temp.json ]; then
-              echo "," >> nested-prefixes-temp.json
-            fi
+            # Append the data for the current prefix as a JSON object
             {
-              echo "{\"prefix\": \"$prefix\","
-              echo " \"prefixes\": $(echo "$prefixes" | jq -R . | jq -s .),"
-              echo " \"files\": $(echo "$files" | jq -R . | jq -s .)"
+              echo "{"
+              echo "  \"prefix\": \"$prefix\","
+              echo "  \"prefixes\": $(echo "$prefixes" | jq -R . | jq -s .),"
+              echo "  \"files\": $(echo "$files" | jq -R . | jq -s .)"
               echo "}"
-            } >> nested-prefixes-temp.json
+            } >> "$tmp_file"
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -85,18 +87,21 @@ jobs:
             done
           }
 
-          # Initialize output file
-          echo "[" > nested-prefixes-temp.json
-          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
-          echo "]" >> nested-prefixes-temp.json
+          # Initialize temporary file
+          > "$tmp_file"
 
-          # Validate and format the JSON
-          jq -s '.' nested-prefixes-temp.json > nested-prefixes.json
-          rm -f nested-prefixes-temp.json
+          # Fetch prefixes
+          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
+
+          # Format and finalize JSON array
+          jq -s '.' "$tmp_file" > "$output_file"
+
+          # Clean up temporary file
+          rm -f "$tmp_file"
 
           # Validate JSON structure
-          if ! jq empty nested-prefixes.json; then
-            echo "Error: Invalid JSON structure in nested-prefixes.json."
+          if ! jq empty "$output_file"; then
+            echo "Error: Invalid JSON structure in $output_file."
             exit 1
           fi
 
