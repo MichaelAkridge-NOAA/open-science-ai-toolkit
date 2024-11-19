@@ -1,134 +1,149 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}" media="screen" type="text/css">
-  <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <![endif]-->
-  {% seo %}
-  {% include head-custom.html %}
+  <title>NODD AI Dataset Viewer</title>
   <style>
-    /* Optional inline styles for better presentation */
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
     }
-    header {
-      background-color: #007BFF;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 24px;
-    }
-    header p {
-      margin: 5px 0 0;
-      font-size: 14px;
-    }
-    main {
-      padding: 20px;
-    }
-    #listing ul {
+    ul {
       list-style-type: none;
-      padding: 0;
+      padding-left: 20px;
     }
-    #listing li {
-      margin: 5px 0;
-    }
-    #listing li a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-    #listing li a:hover {
-      text-decoration: underline;
-    }
-    #listing .directory a {
+    .folder {
       font-weight: bold;
+      cursor: pointer;
+      color: #2a72d0;
+    }
+    .hidden {
+      display: none;
+    }
+    .file {
+      color: #0073e6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .api-link, .gsutil-command {
+      margin-left: 20px;
+      font-style: italic;
+      color: gray;
+    }
+    .copy-btn {
+      margin-left: 10px;
+      cursor: pointer;
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      padding: 2px 5px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>GCS Bucket File Listing</h1>
-    <p>Browse files and directories from a Google Cloud Storage bucket.</p>
-  </header>
-<body>
-  <h1>GCS Prefix Viewer</h1>
-  <p>Browse directories and files in the specified GCS prefix:</p>
-  <div id="listing">Loading...</div>
+  <h1>NODD AI Dataset Viewer</h1>
+  <div id="bucket-contents">Loading...</div>
 
-<script>
-  // Load the nested JSON data
-  fetch('nested-prefixes.json')
-    .then(response => response.json())
-    .then(data => {
-      const listingElement = document.getElementById('listing');
-      renderListing(data, "PIFSC/ESD/ARP/pifsc-ai-data-repository/", listingElement);
-    })
-    .catch(error => {
-      console.error('Failed to load bucket data:', error);
-      document.getElementById('listing').innerHTML = '<p>Error loading bucket data.</p>';
-    });
+  <script>
+    const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json'; // Replace with the actual path to your JSON file
 
-  // Render listing for a specific prefix
-  function renderListing(data, currentPrefix, container) {
-    container.innerHTML = ''; // Clear current listing
-    const currentData = data.find(item => item.prefix === currentPrefix);
+    // Fetch and render the bucket data
+    fetch(jsonUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch JSON data');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const container = document.getElementById('bucket-contents');
+        container.innerHTML = ''; // Clear the "Loading..." message
+        renderTree(data[0], container); // Render the tree starting from the root node
+      })
+      .catch(error => {
+        console.error('Error fetching JSON:', error);
+        document.getElementById('bucket-contents').textContent = 'Failed to load data.';
+      });
 
-    if (!currentData) {
-      container.innerHTML = '<p>No data available for this prefix.</p>';
-      return;
+    // Function to render folders and files recursively
+    function renderTree(node, container) {
+      const ul = document.createElement('ul');
+
+      node.prefixes?.forEach(prefix => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = prefix.split('/').filter(Boolean).pop(); // Show last folder name
+        span.classList.add('folder');
+        span.onclick = () => toggleChildren(li);
+
+        const apiLink = document.createElement('a');
+        apiLink.textContent = "API Link";
+        apiLink.href = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${prefix}`;
+        apiLink.target = "_blank";
+        apiLink.classList.add('api-link');
+
+        const gsutilCmd = document.createElement('span');
+        gsutilCmd.classList.add('gsutil-command');
+        const command = `gsutil -m cp -r gs://nmfs_odp_pifsc/${prefix} .`;
+        gsutilCmd.textContent = `gsutil command: ${command}`;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.add('copy-btn');
+        copyBtn.onclick = () => copyToClipboard(command);
+
+        const childContainer = document.createElement('div');
+        childContainer.classList.add('hidden');
+
+        li.appendChild(span);
+        li.appendChild(apiLink);
+        li.appendChild(gsutilCmd);
+        li.appendChild(copyBtn);
+        li.appendChild(childContainer);
+        ul.appendChild(li);
+
+        // Fetch nested data for this prefix and render lazily
+        span.onclick = () => {
+          if (childContainer.innerHTML === '') {
+            const nestedNode = data.find(item => item.prefix === prefix);
+            if (nestedNode) {
+              renderTree(nestedNode, childContainer);
+            }
+          }
+        };
+      });
+
+      node.files?.forEach(file => {
+        const li = document.createElement('li');
+        const fileLink = document.createElement('a');
+        fileLink.textContent = file.split('/').filter(Boolean).pop(); // Show file name
+        fileLink.href = `https://storage.googleapis.com/${file}`; // Direct download link
+        fileLink.target = '_blank';
+        fileLink.classList.add('file');
+        li.appendChild(fileLink);
+        ul.appendChild(li);
+      });
+
+      container.appendChild(ul);
     }
 
-    let content = '<ul>';
+    function toggleChildren(li) {
+      const childContainer = li.querySelector('div');
+      if (childContainer.classList.contains('hidden')) {
+        childContainer.classList.remove('hidden');
+      } else {
+        childContainer.classList.add('hidden');
+      }
+    }
 
-    // Display directories
-    currentData.prefixes.forEach(subPrefix => {
-      const folderName = subPrefix.replace(currentPrefix, '').replace(/\/$/, '');
-      content += `<li class="directory"><a href="#" onclick="navigateTo('${subPrefix}'); return false;">${folderName}/</a></li>`;
-    });
-
-    // Display files
-    currentData.files.forEach(file => {
-      const fileName = file.replace(currentPrefix, '');
-      const fileUrl = `https://storage.googleapis.com/${file}`;
-      content += `<li class="file"><a href="${fileUrl}" target="_blank">${fileName}</a></li>`;
-    });
-
-    // Add download command for gsutil
-    content += `<li class="download"><a href="#" onclick="showDownloadCommand('${currentPrefix}'); return false;">Download this directory</a></li>`;
-
-    content += '</ul>';
-    container.innerHTML = content;
-  }
-
-  // Navigate to a subdirectory
-  function navigateTo(prefix) {
-    const listingElement = document.getElementById('listing');
-    fetch('nested-prefixes.json')
-      .then(response => response.json())
-      .then(data => {
-        renderListing(data, prefix, listingElement);
-      })
-      .catch(error => console.error('Failed to load subdirectory:', error));
-  }
-
-  // Show download command for gsutil
-  function showDownloadCommand(prefix) {
-    const command = `gsutil -m cp -r gs://nmfs_odp_pifsc/${prefix} ./`;
-    alert(`Run this command to download:\n\n${command}`);
-  }
-</script>
-
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }, () => {
+        alert('Failed to copy.');
+      });
+    }
+  </script>
 </body>
 </html>
-

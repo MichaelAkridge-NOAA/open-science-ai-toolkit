@@ -63,7 +63,7 @@ jobs:
               --endpoint-url https://storage.googleapis.com)
 
             # Debug: Save the response for inspection
-            echo "$response" | jq . > debug-response.json
+            # echo "$response" | jq . > debug-response.json
 
             # Parse prefixes (handle null gracefully)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
