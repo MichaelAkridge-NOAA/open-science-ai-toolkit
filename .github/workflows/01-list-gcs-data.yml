@@ -2,7 +2,7 @@ name: 01 | Fetch and Save GCS Prefixes
 on:
   push:
     branches:
-      - gh-pages  # Trigger on update to the gh-pages branch
+      - gh-pages  # Trigger on updates to the gh-pages branch
   workflow_dispatch:
 
 jobs:
@@ -62,17 +62,19 @@ jobs:
               --delimiter / \
               --endpoint-url https://storage.googleapis.com)
 
-            # Debug: Save the response for inspection
-            # echo "$response" | jq . > debug-response.json
-
             # Parse prefixes (handle null gracefully)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
             # Parse files (handle null gracefully)
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
-            # Save data
-            echo "{\"prefix\": \"$prefix\", \"prefixes\": [$(echo "$prefixes" | jq -R . | jq -s .)], \"files\": [$(echo "$files" | jq -R . | jq -s .)]}" >> nested-prefixes.json
+            # Append the data for the current prefix
+            {
+              echo "{\"prefix\": \"$prefix\","
+              echo " \"prefixes\": $(echo "$prefixes" | jq -R . | jq -s .),"
+              echo " \"files\": $(echo "$files" | jq -R . | jq -s .)"
+              echo "},"
+            } >> nested-prefixes-temp.json
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -81,9 +83,19 @@ jobs:
           }
 
           # Initialize output file
-          echo "[" > nested-prefixes.json
+          echo "[" > nested-prefixes-temp.json
           fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
-          echo "]" >> nested-prefixes.json
+          echo "]" >> nested-prefixes-temp.json
+
+          # Remove trailing commas and format the JSON file
+          jq '.' nested-prefixes-temp.json > nested-prefixes.json
+          rm -f nested-prefixes-temp.json
+
+          # Validate JSON structure
+          if ! jq empty nested-prefixes.json; then
+            echo "Error: Invalid JSON structure in nested-prefixes.json."
+            exit 1
+          fi
 
       - name: Commit and push changes
         env:
@@ -91,6 +103,6 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add nested-prefixes.json debug-response.json
+          git add nested-prefixes.json
           git commit -m "Updated all nested prefixes with exclusion logic" || echo "No changes to commit"
           git push origin gh-pages
