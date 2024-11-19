@@ -1,33 +1,43 @@
-// Dynamically set the document title if AUTO_TITLE is enabled
-if (typeof AUTO_TITLE !== 'undefined' && AUTO_TITLE === true) {
+// Configuration for GCS bucket listing
+var API_ENDPOINT = 'https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o';
+var GCSB_SORT = 'DEFAULT'; // Sorting options
+var EXCLUDE_FILE = []; // Files to exclude
+var GCSB_ROOT_DIR = ''; // Root directory, if needed
+var AUTO_TITLE = true;
+
+// Set the document title automatically
+if (AUTO_TITLE) {
   document.title = location.hostname;
 }
 
-// Default variables
-var BUCKET_URL = typeof BUCKET_URL !== 'undefined' ? BUCKET_URL : location.origin;
-var GCSB_ROOT_DIR = typeof GCSB_ROOT_DIR !== 'undefined' ? GCSB_ROOT_DIR : '';
-var GCSB_SORT = typeof GCSB_SORT !== 'undefined' ? GCSB_SORT : 'DEFAULT';
-var EXCLUDE_FILE = Array.isArray(EXCLUDE_FILE) ? EXCLUDE_FILE : [];
-var GCSBL_IGNORE_PATH = typeof GCSBL_IGNORE_PATH !== 'undefined' ? GCSBL_IGNORE_PATH : false;
-
-// Fetch bucket data using GCS JSON API
-function getBucketData() {
-  const gcsApiUrl = `${BUCKET_URL}?prefix=${GCSB_ROOT_DIR}&delimiter=/`;
+// Fetch and display bucket data using JSON API
+function getBucketData(pageToken = '') {
+  let url = `${API_ENDPOINT}?prefix=${GCSB_ROOT_DIR}&delimiter=/`;
+  if (pageToken) {
+    url += `&pageToken=${pageToken}`;
+  }
 
   // Display a loading message
   const listingElement = document.getElementById('listing');
-  listingElement.innerHTML = '<p>Loading files...</p>';
+  if (!pageToken) {
+    listingElement.innerHTML = '<p>Loading files...</p>';
+  }
 
-  fetch(gcsApiUrl)
+  fetch(url)
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       return response.json();
     })
     .then((data) => {
-      // Process and display files
       const files = data.items || [];
       const directories = data.prefixes || [];
+
       renderListing(files, directories);
+
+      // If there's a nextPageToken, fetch more results
+      if (data.nextPageToken) {
+        getBucketData(data.nextPageToken);
+      }
     })
     .catch((error) => {
       console.error('Error fetching bucket data:', error);
@@ -38,12 +48,11 @@ function getBucketData() {
 // Render file and directory listing
 function renderListing(files, directories) {
   const listingElement = document.getElementById('listing');
-  let content = '<ul>';
+  let content = listingElement.innerHTML === '<p>Loading files...</p>' ? '' : listingElement.innerHTML;
 
   // Add directories
   directories.forEach((dir) => {
-    const dirName = dir.replace(GCSB_ROOT_DIR, '');
-    content += `<li class="directory"><a href="${BUCKET_URL}/${dir}" target="_blank">${dirName}/</a></li>`;
+    content += `<li class="directory"><a href="${dir.mediaLink}" target="_blank">${dir.name}/</a></li>`;
   });
 
   // Sort files if a sort option is selected
@@ -54,11 +63,11 @@ function renderListing(files, directories) {
   // Add files
   files.forEach((file) => {
     if (!EXCLUDE_FILE.includes(file.name)) {
-      content += `<li class="file"><a href="${BUCKET_URL}/${file.name}" target="_blank">${file.name}</a> (${bytesToHumanReadable(file.size)})</li>`;
+      const size = bytesToHumanReadable(file.size);
+      content += `<li class="file"><a href="${file.mediaLink}" target="_blank">${file.name}</a> (${size})</li>`;
     }
   });
 
-  content += '</ul>';
   listingElement.innerHTML = content;
 }
 
@@ -74,9 +83,9 @@ function sortFiles(a, b, sortOption) {
     case 'Z2A':
       return b.name.localeCompare(a.name);
     case 'BIG2SMALL':
-      return b.size - a.size;
+      return parseInt(b.size, 10) - parseInt(a.size, 10);
     case 'SMALL2BIG':
-      return a.size - b.size;
+      return parseInt(a.size, 10) - parseInt(b.size, 10);
     default:
       return 0;
   }
@@ -94,4 +103,4 @@ function bytesToHumanReadable(sizeInBytes) {
 }
 
 // Initialize listing on page load
-document.addEventListener('DOMContentLoaded', getBucketData);
+document.addEventListener('DOMContentLoaded', () => getBucketData());

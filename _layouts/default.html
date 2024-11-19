@@ -12,7 +12,7 @@
   <![endif]-->
   {% seo %}
   {% include head-custom.html %}
-  <script src="https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/assets/js/loadList.js"></script>
+  <script src="{{ '/assets/js/loadList.js' | relative_url }}"></script>
   <title>GCS Bucket File Listing</title>
   <link rel="stylesheet" href="/assets/css/style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -61,21 +61,15 @@
   </style>
 </head>
 <body>
-    <header>
-      <div class="inner">
-        <a href="{{ '/' | absolute_url }}">
-          <h1>{{ site.title | default: site.github.repository_name }}</h1>
-        </a>
-        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
-        {% if site.github.is_project_page %}
-          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
-        {% endif %}
-      </div>
-    </header>
+  <header>
+    <h1>GCS Bucket File Listing</h1>
+    <p>Browse files and directories from a Google Cloud Storage bucket.</p>
+  </header>
+
   <main>
     <section id="content">
       <h2>File Listing</h2>
-      <div id="listing">Loading...</div>
+      <ul id="listing">Loading...</ul>
     </section>
   </main>
 
@@ -83,15 +77,12 @@
     <p style="text-align: center; font-size: 12px; color: #666;">Generated with GitHub Pages</p>
   </footer>
 
-  <!-- Include the updated loadList.js -->
   <script>
-    // Configuration for bucket listing
-    var BUCKET_URL = 'https://storage.googleapis.com/nmfs_odp_pifsc';
-    var GCSB_SORT = 'NEW2OLD'; // Sorting options: DEFAULT, NEW2OLD, OLD2NEW, A2Z, Z2A, BIG2SMALL, SMALL2BIG
-    var EXCLUDE_FILE = []; // Add file names to exclude
-    var GCSB_ROOT_DIR = ''; // Specify a root directory if needed
-    var AUTO_TITLE = true; // Automatically set page title
-    var GCSBL_IGNORE_PATH = false; // Ignore path in URL
+    var API_ENDPOINT = 'https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o';
+    var GCSB_SORT = 'DEFAULT';
+    var EXCLUDE_FILE = [];
+    var GCSB_ROOT_DIR = '';
+    var AUTO_TITLE = true;
   </script>
   <script src="/assets/js/loadList.js"></script>
 </body>
