@@ -1,9 +1,10 @@
-name: 01 | Fetch and Save GCS Prefixes 
+name: 01 | Fetch and Save GCS Prefixes  
 on:
   push:
     branches:
       - gh-pages  # Trigger on update to the gh-pages branch
   workflow_dispatch:
+
 jobs:
   fetch-gcs-prefixes:
     runs-on: ubuntu-latest
@@ -13,12 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install AWS CLI
+      - name: Install AWS CLI and jq
         run: |
           sudo apt-get update
-          sudo apt-get install -y awscli
+          sudo apt-get install -y awscli jq
 
-      - name: Fetch GCS bucket prefixes using HMAC keys
+      - name: Fetch all nested prefixes using HMAC keys
         env:
           GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
@@ -30,15 +31,35 @@ jobs:
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
-          echo "Fetching GCS bucket prefixes for PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          # Recursive function to fetch nested prefixes
+          fetch_prefixes() {
+            local prefix=$1
+            echo "Fetching prefixes for $prefix"
 
-          # Fetch and save JSON data with only prefixes
-          aws s3api list-objects-v2 \
-            --bucket nmfs_odp_pifsc \
-            --prefix PIFSC/ESD/ARP/pifsc-ai-data-repository/ \
-            --delimiter / \
-            --endpoint-url https://storage.googleapis.com \
-            > prefixes.json
+            # Fetch current level
+            response=$(aws s3api list-objects-v2 \
+              --bucket nmfs_odp_pifsc \
+              --prefix "$prefix" \
+              --delimiter / \
+              --endpoint-url https://storage.googleapis.com)
+
+            # Parse prefixes and files
+            prefixes=$(echo "$response" | jq -r '.CommonPrefixes[].Prefix // empty')
+            files=$(echo "$response" | jq -r '.Contents[].Key // empty')
+
+            # Save data
+            echo "{\"prefix\": \"$prefix\", \"prefixes\": [${prefixes}], \"files\": [${files}]}" >> nested-prefixes.json
+
+            # Recurse into each prefix
+            for sub_prefix in $prefixes; do
+              fetch_prefixes "$sub_prefix"
+            done
+          }
+
+          # Initialize output file
+          echo "[" > nested-prefixes.json
+          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          echo "]" >> nested-prefixes.json
 
       - name: Commit and push changes
         env:
@@ -46,6 +67,6 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add prefixes.json
-          git commit -m "Updated GCS bucket prefixes" || echo "No changes to commit"
+          git add nested-prefixes.json
+          git commit -m "Updated all nested prefixes" || echo "No changes to commit"
           git push origin gh-pages

@@ -66,57 +66,69 @@
   <p>Browse directories and files in the specified GCS prefix:</p>
   <div id="listing">Loading...</div>
 
-  <script>
-    // Load the JSON data (replace 'prefixes.json' with the actual path to your file)
-    fetch('prefixes.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
+<script>
+  // Load the nested JSON data
+  fetch('nested-prefixes.json')
+    .then(response => response.json())
+    .then(data => {
+      const listingElement = document.getElementById('listing');
+      renderListing(data, "PIFSC/ESD/ARP/pifsc-ai-data-repository/", listingElement);
+    })
+    .catch(error => {
+      console.error('Failed to load bucket data:', error);
+      document.getElementById('listing').innerHTML = '<p>Error loading bucket data.</p>';
+    });
+
+  // Render listing for a specific prefix
+  function renderListing(data, currentPrefix, container) {
+    container.innerHTML = ''; // Clear current listing
+    const currentData = data.find(item => item.prefix === currentPrefix);
+
+    if (!currentData) {
+      container.innerHTML = '<p>No data available for this prefix.</p>';
+      return;
+    }
+
+    let content = '<ul>';
+
+    // Display directories
+    currentData.prefixes.forEach(subPrefix => {
+      const folderName = subPrefix.replace(currentPrefix, '').replace(/\/$/, '');
+      content += `<li class="directory"><a href="#" onclick="navigateTo('${subPrefix}'); return false;">${folderName}/</a></li>`;
+    });
+
+    // Display files
+    currentData.files.forEach(file => {
+      const fileName = file.replace(currentPrefix, '');
+      const fileUrl = `https://storage.googleapis.com/${file}`;
+      content += `<li class="file"><a href="${fileUrl}" target="_blank">${fileName}</a></li>`;
+    });
+
+    // Add download command for gsutil
+    content += `<li class="download"><a href="#" onclick="showDownloadCommand('${currentPrefix}'); return false;">Download this directory</a></li>`;
+
+    content += '</ul>';
+    container.innerHTML = content;
+  }
+
+  // Navigate to a subdirectory
+  function navigateTo(prefix) {
+    const listingElement = document.getElementById('listing');
+    fetch('nested-prefixes.json')
+      .then(response => response.json())
       .then(data => {
-        const listingElement = document.getElementById('listing');
-        let content = '<ul>';
-
-        // Display directories (CommonPrefixes)
-        if (data.CommonPrefixes) {
-          data.CommonPrefixes.forEach(prefix => {
-            const folderName = prefix.Prefix.replace(data.Prefix, '').replace(/\/$/, '');
-            content += `<li class="directory"><a href="#" onclick="fetchSubdirectory('${prefix.Prefix}'); return false;">${folderName}/</a></li>`;
-          });
-        }
-
-        // Display files (Contents)
-        if (data.Contents) {
-          data.Contents.forEach(item => {
-            const fileName = item.Key.replace(data.Prefix, '');
-            if (fileName) {
-              content += `<li class="file"><a href="#" onclick="viewFile('${item.Key}'); return false;">${fileName}</a></li>`;
-            }
-          });
-        }
-
-        content += '</ul>';
-        listingElement.innerHTML = content;
+        renderListing(data, prefix, listingElement);
       })
-      .catch(error => {
-        console.error('Failed to load bucket data:', error);
-        document.getElementById('listing').innerHTML = '<p>Error loading bucket data.</p>';
-      });
+      .catch(error => console.error('Failed to load subdirectory:', error));
+  }
 
-    // Placeholder for subdirectory fetching (future implementation)
-    function fetchSubdirectory(prefix) {
-      alert(`Fetching contents of subdirectory: ${prefix}`);
-      // Implement API call for subdirectory data if needed
-    }
+  // Show download command for gsutil
+  function showDownloadCommand(prefix) {
+    const command = `gsutil -m cp -r gs://nmfs_odp_pifsc/${prefix} ./`;
+    alert(`Run this command to download:\n\n${command}`);
+  }
+</script>
 
-    // Placeholder for file viewing (future implementation)
-    function viewFile(key) {
-      alert(`Viewing file: ${key}`);
-      // Implement file viewing or download logic if needed
-    }
-  </script>
 </body>
 </html>
 
