@@ -64,17 +64,71 @@
     <p>Browse files and directories from a Google Cloud Storage bucket.</p>
   </header>
 
-  <main>
-    <section id="content">
-      <h2>File Listing</h2>
-      <div id="listing">Loading...</div>
-    </section>
-  </main>
+<body>
+  <h1>GCS Data Viewer</h1>
+  <div id="listing">Loading...</div>
 
   <script>
-    var API_ENDPOINT = 'https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=PIFSC/ESD/ARP/pifsc-ai-data-repository/';
-    var GCSB_ROOT_DIR = '';
-    var AUTO_TITLE = true;
+    fetch('buckets.json')
+      .then(response => response.json())
+      .then(data => {
+        const listingElement = document.getElementById('listing');
+        let content = '<ul>';
+
+        // Add prefixes (directories) only
+        if (data.prefixes) {
+          data.prefixes.forEach(prefix => {
+            const folderName = prefix.replace('PIFSC/ESD/ARP/pifsc-ai-data-repository/', '').replace(/\/$/, '');
+            content += `<li><a href="#" onclick="fetchSubdirectory('${prefix}'); return false;">${folderName}/</a></li>`;
+          });
+        }
+
+        content += '</ul>';
+        listingElement.innerHTML = content;
+      })
+      .catch(error => {
+        console.error('Failed to load bucket prefixes:', error);
+        document.getElementById('listing').innerHTML = '<p>Error loading bucket prefixes.</p>';
+      });
+
+    // Function to fetch and display subdirectory contents
+    function fetchSubdirectory(prefix) {
+      fetch(`https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${prefix}&delimiter=/`)
+        .then(response => response.json())
+        .then(data => {
+          const subListingId = `sub-${prefix}`;
+          let content = `<ul id="${subListingId}">`;
+
+          // Add subdirectories (prefixes)
+          if (data.prefixes) {
+            data.prefixes.forEach(subprefix => {
+              const folderName = subprefix.replace(prefix, '').replace(/\/$/, '');
+              content += `<li><a href="#" onclick="fetchSubdirectory('${subprefix}'); return false;">${folderName}/</a></li>`;
+            });
+          }
+
+          // Add files
+          if (data.items) {
+            data.items.forEach(item => {
+              content += `<li><a href="${item.mediaLink}" target="_blank">${item.name.replace(prefix, '')}</a></li>`;
+            });
+          }
+
+          content += '</ul>';
+
+          // Add the subdirectory content below the clicked directory
+          const existingElement = document.getElementById(subListingId);
+          if (existingElement) {
+            existingElement.remove(); // Remove if already expanded
+          } else {
+            const parentElement = document.querySelector(`a[href="#"][onclick*="${prefix}"]`).parentElement;
+            parentElement.insertAdjacentHTML('beforeend', content);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to load subdirectory data:', error);
+        });
+    }
   </script>
 </body>
 </html>

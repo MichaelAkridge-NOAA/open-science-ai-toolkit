@@ -1,0 +1,28 @@
+name: 01 | Fetch and Save GCS Prefixes
+on:
+  workflow_dispatch:
+jobs:
+  fetch-gcs-prefixes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Fetch GCS bucket prefixes
+        env:
+          GCS_API_KEY: ${{ secrets.GCS_API_KEY }}
+        run: |
+          echo "Fetching GCS bucket prefixes for PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          
+          # Fetch and save JSON data with only prefixes
+          curl -L \
+            "https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=PIFSC/ESD/ARP/pifsc-ai-data-repository/&delimiter=/&key=$GCS_API_KEY" \
+            > buckets.json
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add buckets.json
+          git commit -m "Updated GCS bucket prefixes" || echo "No changes to commit"
+          git push
