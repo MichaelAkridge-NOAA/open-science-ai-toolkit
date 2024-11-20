@@ -11,24 +11,55 @@
       font-family: Arial, sans-serif;
       margin: 20px;
     }
+    .breadcrumb {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      list-style: none;
+      margin: 0;
+      padding-left: 0;
+    }
+    .breadcrumb-item {
+      margin-right: 5px;
+    }
+    .breadcrumb-item a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .breadcrumb-item a:hover {
+      text-decoration: underline;
+    }
     .folder {
       cursor: pointer;
-      color: #007BFF;
-      margin-bottom: 5px;
+      color: #007bff;
+      text-decoration: underline;
     }
-    .hidden {
-      display: none;
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin: 5px 0;
     }
   </style>
 </head>
 <body>
   <h1>NODD AI Dataset Viewer</h1>
-  <div id="breadcrumb"></div>
+  <nav>
+    <ol class="breadcrumb" id="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="#" onclick="navigateToRoot()">Home</a>
+      </li>
+    </ol>
+  </nav>
   <div id="bucket-contents">Loading...</div>
 
   <script>
     const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json';
-    let currentPath = [];
+    let data = [];
+    let currentPrefix = 'PIFSC/ESD/ARP/pifsc-ai-data-repository/';
 
     async function fetchData() {
       const response = await fetch(jsonUrl);
@@ -36,25 +67,33 @@
       return response.json();
     }
 
-    function renderBreadcrumb() {
-      const breadcrumbDiv = document.getElementById('breadcrumb');
-      breadcrumbDiv.innerHTML = currentPath.map((folder, index) => `
-        <span class="folder" onclick="navigateTo(${index})">${folder}</span>
-        ${index < currentPath.length - 1 ? ' > ' : ''}
-      `).join('');
+    function updateBreadcrumb() {
+      const breadcrumb = document.getElementById('breadcrumb');
+      const parts = currentPrefix.split('/').filter(Boolean);
+      breadcrumb.innerHTML = `<li class="breadcrumb-item">
+        <a href="#" onclick="navigateToRoot()">Home</a>
+      </li>`;
+      parts.reduce((path, part, index) => {
+        path += `${part}/`;
+        breadcrumb.innerHTML += `<li class="breadcrumb-item">
+          <a href="#" onclick="navigateTo('${path}')">${part}</a>
+        </li>`;
+        return path;
+      }, '');
     }
 
-    function renderTree(prefix, data) {
+    function renderContents(prefix) {
       const container = document.getElementById('bucket-contents');
-      const currentNode = data.find(item => item.prefix === prefix);
-
-      if (!currentNode) return;
+      const node = data.find(item => item.prefix === prefix);
+      if (!node) {
+        container.innerHTML = '<p>No data available for this folder.</p>';
+        return;
+      }
 
       const ul = document.createElement('ul');
-      currentNode.prefixes.forEach(subPrefix => {
+      node.prefixes.forEach(subPrefix => {
         const li = document.createElement('li');
         const folderName = subPrefix.split('/').filter(Boolean).pop();
-
         li.innerHTML = `<span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>`;
         ul.appendChild(li);
       });
@@ -63,27 +102,27 @@
       container.appendChild(ul);
     }
 
-    function navigateTo(indexOrPrefix) {
-      if (typeof indexOrPrefix === 'number') {
-        currentPath = currentPath.slice(0, indexOrPrefix + 1);
-      } else {
-        currentPath.push(indexOrPrefix.split('/').filter(Boolean).pop());
-      }
-
-      renderBreadcrumb();
-      renderTree(currentPath.join('/'), data);
+    function navigateTo(prefix) {
+      currentPrefix = prefix;
+      updateBreadcrumb();
+      renderContents(prefix);
     }
 
-    let data = [];
-    fetchData().then(fetchedData => {
-      data = fetchedData;
-      currentPath = ['PIFSC/ESD/ARP/pifsc-ai-data-repository/'];
-      renderBreadcrumb();
-      renderTree(currentPath[0], data);
-    }).catch(error => {
-      console.error('Error fetching JSON:', error);
-      document.getElementById('bucket-contents').textContent = 'Failed to load data.';
-    });
+    function navigateToRoot() {
+      currentPrefix = 'PIFSC/ESD/ARP/pifsc-ai-data-repository/';
+      updateBreadcrumb();
+      renderContents(currentPrefix);
+    }
+
+    fetchData()
+      .then(fetchedData => {
+        data = fetchedData;
+        navigateToRoot();
+      })
+      .catch(error => {
+        console.error('Error fetching JSON:', error);
+        document.getElementById('bucket-contents').textContent = 'Failed to load data.';
+      });
   </script>
 </body>
 </html>
