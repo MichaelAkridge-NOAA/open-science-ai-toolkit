@@ -24,6 +24,7 @@ jobs:
           GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
         run: |
+
           echo "Configuring AWS CLI for GCS"
 
           # Configure AWS CLI for GCS
@@ -89,6 +90,9 @@ jobs:
 
           # Start fetching prefixes
           fetch_prefixes "$ROOT_PREFIX" 0
+
+          # Ensure the file has a change timestamp
+          touch $OUTPUT_FILE
 
       - name: Commit and push changes
         env:
