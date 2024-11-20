@@ -55,22 +55,23 @@ jobs:
               --delimiter / \
               --endpoint-url https://storage.googleapis.com || echo "{}")
 
-            # Fetch prefixes (folders)
+            if [ -z "$response" ]; then
+              echo "Warning: No objects found for prefix: $prefix"
+              return
+            fi
+
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
-
-            # Fetch files in the current prefix
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||")
+            txt_files=$(echo "$files" | grep -E '\.txt$' || echo "[]")
 
-            # Add prefixes and files to JSON
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
-              --argjson files "$(echo "$files" | jq -R . | jq -s .)" \
+              --argjson files "$(echo "$txt_files" | jq -R . | jq -s .)" \
               '{prefix: $prefix, prefixes: $prefixes, files: $files}')
 
             jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
 
-            # Recurse into sub-prefixes
             for sub_prefix in $prefixes; do
               fetch_prefixes "$sub_prefix" $((depth + 1))
             done
@@ -87,5 +88,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with file inclusion" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with .txt file inclusion" || echo "No changes to commit"
           git push origin gh-pages
