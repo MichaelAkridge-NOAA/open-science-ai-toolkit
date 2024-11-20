@@ -81,6 +81,7 @@
     }
 
     async function fetchAndRenderReadme(readmeUrl) {
+      console.log("Fetching README from:", readmeUrl);
       try {
         const response = await fetch(readmeUrl);
         if (response.ok) {
@@ -91,6 +92,7 @@
           document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
         }
       } catch (error) {
+        console.error('Error loading README:', error);
         document.getElementById('readme-content').innerHTML = 'Error loading README.';
       }
     }
@@ -120,8 +122,8 @@
 
       const ul = document.createElement('ul');
       (node.prefixes || []).forEach(subPrefix => {
-        const li = document.createElement('li');
         const folderName = subPrefix.split('/').filter(Boolean).pop();
+        const li = document.createElement('li');
         const apiLinkUrl = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${subPrefix}`;
         const gsutilCommand = `gsutil -m rsync -r gs://nmfs_odp_pifsc/${subPrefix} ./`;
 
@@ -144,14 +146,16 @@
       });
 
       (node.files || []).forEach(file => {
+        const fileName = file;
+        const fullPath = `${prefix}${fileName}`;
         const li = document.createElement('li');
-        const fileName = file.split('/').pop();
         li.innerHTML = `<span class="file">${fileName}</span>`;
-
         ul.appendChild(li);
 
-        if (file.endsWith('README.md')) {
-          fetchAndRenderReadme(`https://storage.googleapis.com/nmfs_odp_pifsc/${file}`);
+        if (file === 'README.md') {
+          const readmeUrl = `https://storage.googleapis.com/nmfs_odp_pifsc/${fullPath}`;
+          console.log("Constructed README URL:", readmeUrl);
+          fetchAndRenderReadme(readmeUrl);
         }
       });
 
