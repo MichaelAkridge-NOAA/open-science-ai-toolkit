@@ -25,28 +25,33 @@ jobs:
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
         run: |
           echo "Configuring AWS CLI for GCS"
-          
+
           # Configure AWS CLI for GCS
           aws configure set aws_access_key_id $GCS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
-          # Recursive function to fetch nested prefixes with exclusions
+          # Parameters
+          ROOT_PREFIX="PIFSC/ESD/ARP/pifsc-ai-data-repository/"
+          MAX_DEPTH=5
+          EXCLUDED_FOLDERS=("raw" "images" "labels" "logs" "database")
+          OUTPUT_FILE="nested-prefixes.json"
+
+          # Initialize JSON file
+          echo "[]" > $OUTPUT_FILE
+
+          # Recursive function to fetch nested prefixes
           fetch_prefixes() {
             local prefix=$1
             local depth=$2
-            local max_depth=5  # Set your maximum depth limit here
 
-            if [ "$depth" -ge "$max_depth" ]; then
+            if [ "$depth" -ge "$MAX_DEPTH" ]; then
               echo "Reached max depth for $prefix, skipping deeper fetches."
               return
             fi
 
-            # List of excluded folders
-            excluded_folders=("raw" "images" "labels" "logs" "database")
-
             # Check if the current prefix matches any excluded folder
-            for excluded in "${excluded_folders[@]}"; do
+            for excluded in "${EXCLUDED_FOLDERS[@]}"; do
               if [[ "$prefix" == *"/$excluded/"* ]]; then
                 echo "Skipping excluded folder $prefix."
                 return
@@ -60,12 +65,10 @@ jobs:
               --bucket nmfs_odp_pifsc \
               --prefix "$prefix" \
               --delimiter / \
-              --endpoint-url https://storage.googleapis.com)
+              --endpoint-url https://storage.googleapis.com || echo "{}")
 
-            # Parse prefixes (handle null gracefully)
+            # Parse prefixes and files
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
-
-            # Parse files (handle null gracefully)
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
             # Build JSON object for the current level
@@ -76,11 +79,7 @@ jobs:
               '{prefix: $prefix, prefixes: $prefixes, files: $files}')
 
             # Append to JSON array safely
-            if [ -s nested-prefixes.json ]; then
-              jq ". += [$json_object]" nested-prefixes.json > tmp.json && mv tmp.json nested-prefixes.json
-            else
-              echo "[$json_object]" > nested-prefixes.json
-            fi
+            jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -88,9 +87,8 @@ jobs:
             done
           }
 
-          # Initialize output file
-          echo "[]" > nested-prefixes.json
-          fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
+          # Start fetching prefixes
+          fetch_prefixes "$ROOT_PREFIX" 0
 
       - name: Commit and push changes
         env:
