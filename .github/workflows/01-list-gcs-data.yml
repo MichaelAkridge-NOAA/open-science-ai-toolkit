@@ -19,7 +19,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli jq
 
-      - name: Fetch all nested prefixes
+      - name: Fetch all nested prefixes using HMAC keys
         env:
           GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
@@ -48,15 +48,20 @@ jobs:
               return
             fi
 
+            # Fetch both CommonPrefixes (folders) and Contents (files)
             response=$(aws s3api list-objects-v2 \
               --bucket nmfs_odp_pifsc \
               --prefix "$prefix" \
               --delimiter / \
               --endpoint-url https://storage.googleapis.com || echo "{}")
 
+            # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||" | grep -E '\.md$')
 
+            # Fetch files in the current prefix (e.g., README.md)
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
+
+            # Add the prefix and its folders/files to the JSON
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
@@ -65,6 +70,7 @@ jobs:
 
             jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
 
+            # Recurse into sub-prefixes
             for sub_prefix in $prefixes; do
               fetch_prefixes "$sub_prefix" $((depth + 1))
             done
@@ -81,5 +87,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with .md file inclusion" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with file inclusion" || echo "No changes to commit"
           git push origin gh-pages
