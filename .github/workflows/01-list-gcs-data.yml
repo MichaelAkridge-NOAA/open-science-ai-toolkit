@@ -19,7 +19,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli jq
 
-      - name: Fetch all nested prefixes using HMAC keys
+      - name: Fetch all nested prefixes
         env:
           GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
@@ -58,10 +58,10 @@ jobs:
             # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
-            # Fetch files in the current prefix (e.g., README.md)
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
+            # Fetch files in the current prefix
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||")
 
-            # Add the prefix and its folders/files to the JSON
+            # Add prefixes and files to JSON
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
