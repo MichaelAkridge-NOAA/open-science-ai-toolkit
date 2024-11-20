@@ -65,7 +65,6 @@
     function renderTree(node, container) {
       container.innerHTML = '';
 
-      // Add folders
       node.prefixes?.forEach(prefix => {
         const lastPart = prefix.split('/').filter(Boolean).pop();
         const listItem = document.createElement('a');
@@ -83,7 +82,6 @@
         container.appendChild(listItem);
       });
 
-      // Add files
       node.files?.forEach(file => {
         const lastPart = file.split('/').filter(Boolean).pop();
         const listItem = document.createElement('a');
@@ -150,11 +148,10 @@
           e.preventDefault();
           currentPath = currentPath.slice(0, index + 1);
           updateBreadcrumbs();
-          if (item.prefix) {
-            const node = data.find(d => d.prefix === item.prefix);
-            renderTree(node, document.getElementById('bucket-contents'));
-          } else {
+          if (index === 0) {
             renderTree(data[0], document.getElementById('bucket-contents'));
+          } else {
+            renderChild(item.prefix, document.getElementById('bucket-contents'));
           }
         };
 
