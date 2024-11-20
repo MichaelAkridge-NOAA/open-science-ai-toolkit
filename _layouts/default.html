@@ -6,6 +6,7 @@
   <title>NODD AI Dataset Viewer</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -79,23 +80,23 @@
       return response.json();
     }
 
-async function fetchAndRenderReadme(readmeUrl) {
-  console.log("Fetching README from:", readmeUrl);
-  try {
-    const response = await fetch(readmeUrl);
-    if (response.ok) {
-      const text = await response.text();
-      document.getElementById('readme-content').innerText = text;
-    } else {
-      console.error("Response not OK:", response);
-      document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
+    async function fetchAndRenderReadme(readmeUrl) {
+      console.log("Fetching README from:", readmeUrl);
+      try {
+        const response = await fetch(readmeUrl);
+        if (response.ok) {
+          const markdown = await response.text();
+          const converter = new showdown.Converter();
+          document.getElementById('readme-content').innerHTML = converter.makeHtml(markdown);
+        } else {
+          console.error("Response not OK:", response.status, response.statusText);
+          document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
+        }
+      } catch (error) {
+        console.error('Error loading README:', error);
+        document.getElementById('readme-content').innerHTML = `<p>Error loading README. <a href="${readmeUrl}" target="_blank">Open README in a new tab</a></p>`;
+      }
     }
-  } catch (error) {
-    console.error('Error loading README:', error);
-    document.getElementById('readme-content').innerHTML = `<p>Error loading README. <a href="${readmeUrl}" target="_blank">Open README in a new tab</a></p>`;
-  }
-}
-
 
     function updateBreadcrumb() {
       const breadcrumb = document.getElementById('breadcrumb');
@@ -152,7 +153,7 @@ async function fetchAndRenderReadme(readmeUrl) {
         li.innerHTML = `<span class="file">${fileName}</span>`;
         ul.appendChild(li);
 
-        if (file.endsWith('.txt')) {
+        if (file.endsWith('.md')) {
           const readmeUrl = `https://storage.googleapis.com/nmfs_odp_pifsc/${fullPath}`;
           console.log("Constructed README URL:", readmeUrl);
           fetchAndRenderReadme(readmeUrl);
