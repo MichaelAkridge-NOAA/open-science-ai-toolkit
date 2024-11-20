@@ -4,11 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NODD AI Dataset Viewer</title>
-
-  <!-- Include Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,189 +14,76 @@
     .folder {
       cursor: pointer;
       color: #007BFF;
+      margin-bottom: 5px;
     }
-    .file {
-      color: #0073e6;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .api-link, .gsutil-command {
-      margin-left: 20px;
-      font-style: italic;
-      color: gray;
-    }
-    .copy-btn {
-      margin-left: 10px;
-      cursor: pointer;
-      background-color: #0073e6;
-      color: white;
-      border: none;
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-    .breadcrumbs {
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-    .breadcrumb {
-      color: #007BFF;
-      cursor: pointer;
-      text-decoration: underline;
-      margin-right: 5px;
-    }
-    ul {
-      list-style-type: none;
-      padding-left: 20px;
-    }
-    h1 {
-      color: #007BFF;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center">NODD AI Dataset Viewer</h1>
-    <div id="breadcrumbs" class="breadcrumbs"></div>
-    <div id="bucket-contents" class="mt-4">Loading...</div>
-  </div>
+  <h1>NODD AI Dataset Viewer</h1>
+  <div id="breadcrumb"></div>
+  <div id="bucket-contents">Loading...</div>
 
   <script>
-    const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json'; // Replace with actual path
-    const bucketName = "nmfs_odp_pifsc"; // Your bucket name
-    let rootNode = null; // Store the root node
-    let currentNode = null; // Track the currently displayed node
-    const breadcrumbStack = []; // Track the breadcrumb path
+    const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json';
+    let currentPath = [];
 
-    // Fetch and render the bucket data
-    fetch(jsonUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch JSON data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        rootNode = data[0]; // Store the root node for reset
-        currentNode = rootNode;
-        breadcrumbStack.push(currentNode);
-        updateBreadcrumbs();
-        renderTree(currentNode, document.getElementById('bucket-contents'));
-      })
-      .catch(error => {
-        console.error('Error fetching JSON:', error);
-        document.getElementById('bucket-contents').textContent = 'Failed to load data.';
-      });
+    async function fetchData() {
+      const response = await fetch(jsonUrl);
+      if (!response.ok) throw new Error('Failed to fetch JSON data');
+      return response.json();
+    }
 
-    // Render folders and files recursively
-    function renderTree(node, container) {
-      container.innerHTML = ''; // Clear the container
+    function renderBreadcrumb() {
+      const breadcrumbDiv = document.getElementById('breadcrumb');
+      breadcrumbDiv.innerHTML = currentPath.map((folder, index) => `
+        <span class="folder" onclick="navigateTo(${index})">${folder}</span>
+        ${index < currentPath.length - 1 ? ' > ' : ''}
+      `).join('');
+    }
+
+    function renderTree(prefix, data) {
+      const container = document.getElementById('bucket-contents');
+      const currentNode = data.find(item => item.prefix === prefix);
+
+      if (!currentNode) return;
+
       const ul = document.createElement('ul');
-      ul.classList.add('list-group');
-
-      // Render prefixes (folders)
-      node.prefixes?.forEach(prefix => {
-        if (!prefix) return; // Skip empty prefixes
+      currentNode.prefixes.forEach(subPrefix => {
         const li = document.createElement('li');
-        li.classList.add('list-group-item');
-        const span = document.createElement('span');
-        span.textContent = prefix.split('/').filter(Boolean).pop(); // Show last folder name
-        span.classList.add('folder');
-        span.onclick = () => navigateToPrefix(prefix);
+        const folderName = subPrefix.split('/').filter(Boolean).pop();
 
-        const apiLink = document.createElement('a');
-        apiLink.textContent = "API Link";
-        apiLink.href = `https://www.googleapis.com/storage/v1/b/${bucketName}/o?prefix=${prefix}`;
-        apiLink.target = "_blank";
-        apiLink.classList.add('api-link');
-
-        const gsutilCmd = document.createElement('span');
-        gsutilCmd.classList.add('gsutil-command');
-        const command = `gsutil -m cp -r gs://${bucketName}/${prefix} .`;
-        gsutilCmd.textContent = `gsutil command: ${command}`;
-
-        const copyBtn = document.createElement('button');
-        copyBtn.textContent = "Copy";
-        copyBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'copy-btn');
-        copyBtn.onclick = () => copyToClipboard(command);
-
-        li.appendChild(span);
-        li.appendChild(apiLink);
-        li.appendChild(gsutilCmd);
-        li.appendChild(copyBtn);
+        li.innerHTML = `<span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>`;
         ul.appendChild(li);
       });
 
-      // Render files
-      node.files?.forEach(file => {
-        const li = document.createElement('li');
-        li.classList.add('list-group-item');
-        const fileLink = document.createElement('a');
-        fileLink.textContent = file.split('/').filter(Boolean).pop(); // Show file name
-        fileLink.href = `https://storage.googleapis.com/${file}`;
-        fileLink.target = '_blank';
-        fileLink.classList.add('file');
-        li.appendChild(fileLink);
-        ul.appendChild(li);
-      });
-
+      container.innerHTML = '';
       container.appendChild(ul);
     }
 
-    // Navigate to a specific prefix
-    function navigateToPrefix(prefix) {
-      const nextNode = findNodeByPrefix(rootNode, prefix);
-      if (nextNode) {
-        breadcrumbStack.push(nextNode);
-        currentNode = nextNode;
-        updateBreadcrumbs();
-        renderTree(currentNode, document.getElementById('bucket-contents'));
+    function navigateTo(indexOrPrefix) {
+      if (typeof indexOrPrefix === 'number') {
+        currentPath = currentPath.slice(0, indexOrPrefix + 1);
+      } else {
+        currentPath.push(indexOrPrefix.split('/').filter(Boolean).pop());
       }
+
+      renderBreadcrumb();
+      renderTree(currentPath.join('/'), data);
     }
 
-    // Update breadcrumbs
-    function updateBreadcrumbs() {
-      const breadcrumbContainer = document.getElementById('breadcrumbs');
-      breadcrumbContainer.innerHTML = '';
-
-      breadcrumbStack.forEach((node, index) => {
-        const breadcrumb = document.createElement('span');
-        breadcrumb.textContent = node.prefix.split('/').filter(Boolean).pop() || 'Home';
-        breadcrumb.classList.add('breadcrumb');
-        breadcrumb.onclick = () => navigateBreadcrumb(index);
-
-        breadcrumbContainer.appendChild(breadcrumb);
-        if (index < breadcrumbStack.length - 1) {
-          breadcrumbContainer.appendChild(document.createTextNode(' > '));
-        }
-      });
-    }
-
-    // Navigate via breadcrumbs
-    function navigateBreadcrumb(index) {
-      breadcrumbStack.splice(index + 1); // Trim the stack
-      currentNode = breadcrumbStack[breadcrumbStack.length - 1]; // Update current node
-      updateBreadcrumbs();
-      renderTree(currentNode, document.getElementById('bucket-contents'));
-    }
-
-    // Find a node by its prefix
-    function findNodeByPrefix(node, prefix) {
-      if (node.prefix === prefix) return node;
-      for (const subPrefix of node.prefixes || []) {
-        const subNode = findNodeByPrefix(rootNode, subPrefix);
-        if (subNode) return subNode;
-      }
-      return null;
-    }
-
-    // Copy text to clipboard
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
-      }, () => {
-        alert('Failed to copy.');
-      });
-    }
+    let data = [];
+    fetchData().then(fetchedData => {
+      data = fetchedData;
+      currentPath = ['PIFSC/ESD/ARP/pifsc-ai-data-repository/'];
+      renderBreadcrumb();
+      renderTree(currentPath[0], data);
+    }).catch(error => {
+      console.error('Error fetching JSON:', error);
+      document.getElementById('bucket-contents').textContent = 'Failed to load data.';
+    });
   </script>
 </body>
 </html>
