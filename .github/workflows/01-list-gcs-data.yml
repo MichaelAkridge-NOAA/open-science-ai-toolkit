@@ -58,10 +58,10 @@ jobs:
             # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
-            # Fetch files in the current prefix (e.g., README.md)
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
+            # Fetch files in the current prefix
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||")
 
-            # Add the prefix and its folders/files to the JSON
+            # Add prefixes and files to JSON
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
