@@ -18,7 +18,7 @@
       border-radius: 5px;
       list-style: none;
     }
-    .folder {
+    .folder, .file {
       cursor: pointer;
       color: #007bff;
       text-decoration: underline;
@@ -47,19 +47,6 @@
 <body>
   <h1>NODD AI Dataset Viewer</h1>
 
-  <!-- Site Map Selector -->
-  <nav>
-    <select id="site-map" class="form-select mb-3" onchange="navigateTo(this.value)">
-      <option value="PIFSC/ESD/ARP/pifsc-ai-data-repository/">Home</option>
-    </select>
-  </nav>
-
-  <!-- README Section -->
-  <div id="readme" class="mb-4">
-    <h4>README</h4>
-    <div id="readme-content">Loading README...</div>
-  </div>
-
   <!-- Breadcrumb Navigation -->
   <nav>
     <ol class="breadcrumb" id="breadcrumb"></ol>
@@ -68,11 +55,16 @@
   <!-- Folder Contents -->
   <div id="bucket-contents">Loading...</div>
 
+  <!-- README Content -->
+  <div id="readme" class="mt-4">
+    <h4>README</h4>
+    <div id="readme-content">No README loaded.</div>
+  </div>
+
   <script>
     const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json';
     let data = [];
     let currentPrefix = 'PIFSC/ESD/ARP/pifsc-ai-data-repository/';
-    const siteMap = document.getElementById('site-map');
 
     async function fetchData() {
       const response = await fetch(jsonUrl);
@@ -80,34 +72,19 @@
       return response.json();
     }
 
-    async function fetchAndRenderReadme(url) {
+    async function fetchAndRenderReadme(readmeUrl) {
       try {
-        const response = await fetch(url);
+        const response = await fetch(readmeUrl);
         if (response.ok) {
           const markdown = await response.text();
           const converter = new showdown.Converter();
           document.getElementById('readme-content').innerHTML = converter.makeHtml(markdown);
         } else {
-          document.getElementById('readme-content').innerHTML = '<p>No README available for this folder.</p>';
+          document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
         }
       } catch (error) {
-        document.getElementById('readme-content').innerHTML = '<p>Error loading README.</p>';
+        document.getElementById('readme-content').innerHTML = 'Error loading README.';
       }
-    }
-
-    function updateBreadcrumb() {
-      const breadcrumb = document.getElementById('breadcrumb');
-      const parts = currentPrefix.split('/').filter(Boolean);
-      breadcrumb.innerHTML = `<li class="breadcrumb-item">
-        <a href="#" onclick="navigateToRoot()">Home</a>
-      </li>`;
-      parts.reduce((path, part) => {
-        path += `${part}/`;
-        breadcrumb.innerHTML += `<li class="breadcrumb-item">
-          <a href="#" onclick="navigateTo('${path}')">${part}</a>
-        </li>`;
-        return path;
-      }, '');
     }
 
     function renderContents(prefix) {
@@ -119,29 +96,20 @@
       }
 
       const ul = document.createElement('ul');
-      node.prefixes.forEach(subPrefix => {
+      (node.prefixes || []).forEach(subPrefix => {
         const li = document.createElement('li');
-        const folderName = subPrefix.split('/').filter(Boolean).pop();
-
-        const apiLinkUrl = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${subPrefix}`;
-        const gsutilCommand = `gsutil -m rsync -r gs://nmfs_odp_pifsc/${subPrefix} ./`;
-
-        li.innerHTML = `
-          <span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>
-          <div class="card mt-2">
-            <div class="card-header">
-              <a class="btn btn-link" data-bs-toggle="collapse" href="#details-${folderName}">Details</a>
-            </div>
-            <div id="details-${folderName}" class="collapse">
-              <div class="card-body">
-                <a href="${apiLinkUrl}" target="_blank">API Link</a><br>
-                <code>${gsutilCommand}</code>
-                <button class="copy-btn" onclick="copyToClipboard('${gsutilCommand}')">Copy</button>
-              </div>
-            </div>
-          </div>
-        `;
+        li.innerHTML = `<span class="folder" onclick="navigateTo('${subPrefix}')">${subPrefix.split('/').filter(Boolean).pop()}</span>`;
         ul.appendChild(li);
+      });
+
+      (node.files || []).forEach(file => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="file">${file.split('/').pop()}</span>`;
+        ul.appendChild(li);
+
+        if (file.endsWith('README.md')) {
+          fetchAndRenderReadme(`https://storage.googleapis.com/nmfs_odp_pifsc/${file}`);
+        }
       });
 
       container.innerHTML = '';
@@ -150,42 +118,16 @@
 
     function navigateTo(prefix) {
       currentPrefix = prefix;
-      updateBreadcrumb();
       renderContents(prefix);
-
-      // Example README file fetching logic
-      const readmeUrl = `https://storage.googleapis.com/nmfs_odp_pifsc/${prefix}README.md`;
-      fetchAndRenderReadme(readmeUrl);
-    }
-
-    function navigateToRoot() {
-      navigateTo('PIFSC/ESD/ARP/pifsc-ai-data-repository/');
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
-      }).catch(() => {
-        alert('Failed to copy.');
-      });
     }
 
     fetchData()
       .then(fetchedData => {
         data = fetchedData;
-        navigateToRoot();
-
-        // Populate site map
-        data.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.prefix;
-          option.textContent = item.prefix.split('/').filter(Boolean).pop();
-          siteMap.appendChild(option);
-        });
+        renderContents(currentPrefix);
       })
       .catch(error => {
         console.error('Error fetching JSON:', error);
-        document.getElementById('bucket-contents').textContent = 'Failed to load data.';
       });
   </script>
 </body>
