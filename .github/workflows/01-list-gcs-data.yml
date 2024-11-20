@@ -2,14 +2,14 @@ name: 01 | Fetch and Save GCS Prefixes
 on:
   push:
     branches:
-      - gh-pages  # Trigger on updates to the gh-pages branch
+      - gh-pages
   workflow_dispatch:
 
 jobs:
   fetch-gcs-prefixes:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Allow pushing changes to the repository
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -19,84 +19,65 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y awscli jq
 
-      - name: Fetch all nested prefixes
+      - name: Fetch all nested prefixes using HMAC keys
         env:
           GCS_ACCESS_KEY_ID: ${{ secrets.GCS_ACCESS_KEY_ID }}
           GCS_SECRET_ACCESS_KEY: ${{ secrets.GCS_SECRET_ACCESS_KEY }}
         run: |
-
           echo "Configuring AWS CLI for GCS"
 
-          # Configure AWS CLI for GCS
           aws configure set aws_access_key_id $GCS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
 
-          # Parameters
           ROOT_PREFIX="PIFSC/ESD/ARP/pifsc-ai-data-repository/"
           MAX_DEPTH=5
-          EXCLUDED_FOLDERS=("raw" "images" "labels" "logs" "database" "models")
+          EXCLUDED_FOLDERS=("raw" "images" "labels" "logs" "database")
           OUTPUT_FILE="nested-prefixes.json"
 
-          # Initialize JSON file
           echo "[]" > $OUTPUT_FILE
 
-          # Recursive function to fetch nested prefixes
           fetch_prefixes() {
             local prefix=$1
             local depth=$2
 
             if [ "$depth" -ge "$MAX_DEPTH" ]; then
-              echo "Reached max depth for $prefix, skipping deeper fetches."
               return
             fi
 
-            # Check if the current prefix matches any excluded folder
             for excluded in "${EXCLUDED_FOLDERS[@]}"; do
               if [[ "$prefix" == *"/$excluded/"* ]]; then
-                echo "Skipping excluded folder $prefix."
                 return
               fi
             done
 
-            echo "Fetching prefixes for $prefix at depth $depth"
-
-            # Fetch current level
             response=$(aws s3api list-objects-v2 \
               --bucket nmfs_odp_pifsc \
               --prefix "$prefix" \
               --delimiter / \
               --endpoint-url https://storage.googleapis.com || echo "{}")
 
-            # Parse prefixes and files
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
-            # Build JSON object for the current level
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
-              --argjson files "$(echo "$files" | jq -R . | jq -s .)" \
-              '{prefix: $prefix, prefixes: $prefixes, files: $files}')
+              '{prefix: $prefix, prefixes: $prefixes}')
 
-            # Append to JSON array safely
             jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
 
-            # Recurse into each prefix
             for sub_prefix in $prefixes; do
               fetch_prefixes "$sub_prefix" $((depth + 1))
             done
           }
 
-          # Start fetching prefixes
           fetch_prefixes "$ROOT_PREFIX" 0
 
-          # Ensure the file has a change timestamp
           touch $OUTPUT_FILE
 
       - name: Commit and push changes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Default GitHub token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
