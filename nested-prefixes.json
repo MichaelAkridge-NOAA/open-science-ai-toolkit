@@ -1,1 +1,155 @@
-
+[
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/object-tracking/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/annotations/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/source/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/annotations/",
+    "prefixes": [
+      ""
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/coral-classification/coral_seg_ls_v1/source/",
+    "prefixes": [
+      ""
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_random_sample_set/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_single_source_set/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/oceaneyes_dataset/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/small_test_set/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/annotations/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/datasetv2/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/images/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/labels/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_2016_dataset/raw/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_random_sample_set/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_random_sample_set/annotations/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_random_sample_set/raw/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_random_sample_set/source/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_single_source_set/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_single_source_set/images/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_single_source_set/labels/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/large_single_source_set/raw/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/oceaneyes_dataset/",
+    "prefixes": [
+      ""
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/small_test_set/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/small_test_set/images/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/small_test_set/labels/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/datasets/small_test_set/raw/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_large_random/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_large_single_source/",
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_small_dataset/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_large_random/",
+    "prefixes": [
+      ""
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_large_single_source/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_large_single_source/train/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_small_dataset/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/fish-detection/MOUSS_fish_detection_v1/models/yolov8n_fish_trained_small_dataset/train/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/datasets/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/datasets/",
+    "prefixes": [
+      "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/datasets/small_test_set/"
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/image-segmentation/MOUSS_fish_segmentation_v1/datasets/small_test_set/",
+    "prefixes": [
+      ""
+    ]
+  },
+  {
+    "prefix": "PIFSC/ESD/ARP/pifsc-ai-data-repository/object-tracking/",
+    "prefixes": [
+      ""
+    ]
+  }
+]
