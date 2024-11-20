@@ -58,8 +58,8 @@ jobs:
             # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
-            # Fetch files in the current prefix and include .txt files
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||" | grep -E '\.txt$')
+            # Fetch files in the current prefix
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||")
 
             # Add prefixes and files to JSON
             json_object=$(jq -n \
@@ -87,5 +87,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with .txt file inclusion" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with file inclusion" || echo "No changes to commit"
           git push origin gh-pages
