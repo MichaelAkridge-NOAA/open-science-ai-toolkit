@@ -133,7 +133,7 @@
         li.classList.add('list-group-item');
         const fileLink = document.createElement('a');
         fileLink.textContent = file.split('/').filter(Boolean).pop(); // Show file name
-        fileLink.href = `https://storage.googleapis.com/${bucketName}/${file}`; // Correct GCS file link
+        fileLink.href = `https://storage.googleapis.com/${file}`; // Correct GCS file link
         fileLink.target = '_blank';
         fileLink.classList.add('file');
         li.appendChild(fileLink);
