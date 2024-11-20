@@ -41,7 +41,21 @@
       padding: 0;
     }
     li {
-      margin: 5px 0;
+      margin: 10px 0;
+    }
+    .api-link, .gsutil-command {
+      font-style: italic;
+      color: #555;
+      margin-left: 15px;
+    }
+    .copy-btn {
+      margin-left: 10px;
+      cursor: pointer;
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      padding: 2px 5px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -94,7 +108,16 @@
       node.prefixes.forEach(subPrefix => {
         const li = document.createElement('li');
         const folderName = subPrefix.split('/').filter(Boolean).pop();
-        li.innerHTML = `<span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>`;
+
+        const apiLinkUrl = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${subPrefix}`;
+        const gsutilCommand = `gsutil -m cp -r gs://nmfs_odp_pifsc/${subPrefix} .`;
+
+        li.innerHTML = `
+          <span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>
+          <a href="${apiLinkUrl}" target="_blank" class="api-link">API Link</a>
+          <span class="gsutil-command">gsutil command: ${gsutilCommand}</span>
+          <button class="copy-btn" onclick="copyToClipboard('${gsutilCommand}')">Copy</button>
+        `;
         ul.appendChild(li);
       });
 
@@ -112,6 +135,14 @@
       currentPrefix = 'PIFSC/ESD/ARP/pifsc-ai-data-repository/';
       updateBreadcrumb();
       renderContents(currentPrefix);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }, () => {
+        alert('Failed to copy.');
+      });
     }
 
     fetchData()
