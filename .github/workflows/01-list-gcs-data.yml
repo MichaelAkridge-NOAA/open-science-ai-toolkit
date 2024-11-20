@@ -41,49 +41,36 @@ jobs:
             local prefix=$1
             local depth=$2
 
+            echo "Checking prefix: $prefix at depth $depth"
+
             if [ "$depth" -ge "$MAX_DEPTH" ]; then
+              echo "Max depth reached for prefix: $prefix"
               return
             fi
 
-            for excluded in "${EXCLUDED_FOLDERS[@]}"; do
-              if [[ "$prefix" == *"/$excluded/"* ]]; then
-                # Check if README.md exists in the excluded folder
-                readme_response=$(aws s3api list-objects-v2 \
-                  --bucket nmfs_odp_pifsc \
-                  --prefix "${prefix}README.md" \
-                  --endpoint-url https://storage.googleapis.com || echo "{}")
-
-                readme=$(echo "$readme_response" | jq -r '.Contents[]?.Key // empty')
-
-                if [ -n "$readme" ]; then
-                  json_object=$(jq -n \
-                    --arg prefix "$prefix" \
-                    --argjson prefixes "[\"${prefix}README.md\"]" \
-                    '{prefix: $prefix, prefixes: $prefixes}')
-
-                  jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
-                fi
-
-                return
-              fi
-            done
-
-            # Fetch sub-prefixes for allowed folders
+            # Fetch both CommonPrefixes (folders) and Contents (files)
             response=$(aws s3api list-objects-v2 \
               --bucket nmfs_odp_pifsc \
               --prefix "$prefix" \
               --delimiter / \
               --endpoint-url https://storage.googleapis.com || echo "{}")
 
+            # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
+            # Fetch files in the current prefix (e.g., README.md)
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
+
+            # Add the prefix and its folders/files to the JSON
             json_object=$(jq -n \
               --arg prefix "$prefix" \
               --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
-              '{prefix: $prefix, prefixes: $prefixes}')
+              --argjson files "$(echo "$files" | jq -R . | jq -s .)" \
+              '{prefix: $prefix, prefixes: $prefixes, files: $files}')
 
             jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
 
+            # Recurse into sub-prefixes
             for sub_prefix in $prefixes; do
               fetch_prefixes "$sub_prefix" $((depth + 1))
             done
@@ -100,5 +87,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with exclusion logic and README.md inclusion" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with file inclusion" || echo "No changes to commit"
           git push origin gh-pages
