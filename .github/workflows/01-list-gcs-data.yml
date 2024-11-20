@@ -12,7 +12,7 @@ jobs:
       contents: write  # Allow pushing changes to the repository
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Install AWS CLI and jq
         run: |
@@ -30,10 +30,6 @@ jobs:
           aws configure set aws_access_key_id $GCS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $GCS_SECRET_ACCESS_KEY
           aws configure set default.region us-east-1
-
-          # Temporary file to hold JSON objects
-          tmp_file="nested-prefixes-temp.json"
-          output_file="nested-prefixes.json"
 
           # Recursive function to fetch nested prefixes with exclusions
           fetch_prefixes() {
@@ -72,14 +68,8 @@ jobs:
             # Parse files (handle null gracefully)
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
-            # Append the data for the current prefix as a JSON object
-            {
-              echo "{"
-              echo "  \"prefix\": \"$prefix\","
-              echo "  \"prefixes\": $(echo "$prefixes" | jq -R . | jq -s .),"
-              echo "  \"files\": $(echo "$files" | jq -R . | jq -s .)"
-              echo "}"
-            } >> "$tmp_file"
+            # Save data (include bucket name in prefixes for consistency)
+            echo "{\"prefix\": \"nmfs_odp_pifsc/$prefix\", \"prefixes\": [$(echo "$prefixes" | jq -R . | jq -s .)], \"files\": [$(echo "$files" | jq -R . | jq -s .)]}" >> nested-prefixes.json
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -87,23 +77,10 @@ jobs:
             done
           }
 
-          # Initialize temporary file
-          > "$tmp_file"
-
-          # Fetch prefixes
+          # Initialize output file
+          echo "[" > nested-prefixes.json
           fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
-
-          # Format and finalize JSON array
-          jq -s '.' "$tmp_file" > "$output_file"
-
-          # Clean up temporary file
-          rm -f "$tmp_file"
-
-          # Validate JSON structure
-          if ! jq empty "$output_file"; then
-            echo "Error: Invalid JSON structure in $output_file."
-            exit 1
-          fi
+          echo "]" >> nested-prefixes.json
 
       - name: Commit and push changes
         env:
