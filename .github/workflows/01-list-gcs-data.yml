@@ -4,7 +4,6 @@ on:
     branches:
       - gh-pages
   workflow_dispatch:
-
 jobs:
   fetch-gcs-prefixes:
     runs-on: ubuntu-latest
@@ -14,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install AWS CLI and jq
+      - name: Install
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli jq
@@ -58,8 +57,8 @@ jobs:
             # Fetch prefixes (folders)
             prefixes=$(echo "$response" | jq -r '.CommonPrefixes[]?.Prefix // empty')
 
-            # Fetch files in the current prefix
-            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||")
+            # Fetch files in the current prefix and include .txt files
+            files=$(echo "$response" | jq -r '.Contents[]?.Key // empty' | sed "s|^$prefix||" | grep -E '\.txt$')
 
             # Add prefixes and files to JSON
             json_object=$(jq -n \
@@ -87,5 +86,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with file inclusion" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with .txt file inclusion" || echo "No changes to commit"
           git push origin gh-pages
