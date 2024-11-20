@@ -79,22 +79,23 @@
       return response.json();
     }
 
-    async function fetchAndRenderReadme(readmeUrl) {
-      console.log("Fetching README from:", readmeUrl);
-      try {
-        const response = await fetch(readmeUrl);
-        if (response.ok) {
-          const text = await response.text();
-          // Render the plain text directly
-          document.getElementById('readme-content').innerText = text;
-        } else {
-          document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
-        }
-      } catch (error) {
-        console.error('Error loading README:', error);
-        document.getElementById('readme-content').innerHTML = `<p>Error loading README. <a href="${readmeUrl}" target="_blank">Open README in a new tab</a></p>`;
-      }
+async function fetchAndRenderReadme(readmeUrl) {
+  console.log("Fetching README from:", readmeUrl);
+  try {
+    const response = await fetch(readmeUrl);
+    if (response.ok) {
+      const text = await response.text();
+      document.getElementById('readme-content').innerText = text;
+    } else {
+      console.error("Response not OK:", response);
+      document.getElementById('readme-content').innerHTML = 'No README available for this folder.';
     }
+  } catch (error) {
+    console.error('Error loading README:', error);
+    document.getElementById('readme-content').innerHTML = `<p>Error loading README. <a href="${readmeUrl}" target="_blank">Open README in a new tab</a></p>`;
+  }
+}
+
 
     function updateBreadcrumb() {
       const breadcrumb = document.getElementById('breadcrumb');
