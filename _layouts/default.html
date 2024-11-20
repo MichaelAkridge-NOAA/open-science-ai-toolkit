@@ -124,7 +124,7 @@
         const folderName = subPrefix.split('/').filter(Boolean).pop();
 
         const apiLinkUrl = `https://www.googleapis.com/storage/v1/b/nmfs_odp_pifsc/o?prefix=${subPrefix}`;
-        const gsutilCommand = `gsutil -m cp -r gs://nmfs_odp_pifsc/${subPrefix} .`;
+        const gsutilCommand = `gsutil -m rsync -r gs://nmfs_odp_pifsc/${subPrefix} ./`;
 
         li.innerHTML = `
           <span class="folder" onclick="navigateTo('${subPrefix}')">${folderName}</span>
