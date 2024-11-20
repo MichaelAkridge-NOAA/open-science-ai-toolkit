@@ -68,8 +68,19 @@ jobs:
             # Parse files (handle null gracefully)
             files=$(echo "$response" | jq -r '.Contents[]?.Key // empty')
 
-            # Save data (include bucket name in prefixes for consistency)
-            echo "{\"prefix\": \"nmfs_odp_pifsc/$prefix\", \"prefixes\": [$(echo "$prefixes" | jq -R . | jq -s .)], \"files\": [$(echo "$files" | jq -R . | jq -s .)]}" >> nested-prefixes.json
+            # Build JSON object for the current level
+            json_object=$(jq -n \
+              --arg prefix "$prefix" \
+              --argjson prefixes "$(echo "$prefixes" | jq -R . | jq -s .)" \
+              --argjson files "$(echo "$files" | jq -R . | jq -s .)" \
+              '{prefix: $prefix, prefixes: $prefixes, files: $files}')
+
+            # Append to JSON array safely
+            if [ -s nested-prefixes.json ]; then
+              jq ". += [$json_object]" nested-prefixes.json > tmp.json && mv tmp.json nested-prefixes.json
+            else
+              echo "[$json_object]" > nested-prefixes.json
+            fi
 
             # Recurse into each prefix
             for sub_prefix in $prefixes; do
@@ -78,9 +89,8 @@ jobs:
           }
 
           # Initialize output file
-          echo "[" > nested-prefixes.json
+          echo "[]" > nested-prefixes.json
           fetch_prefixes "PIFSC/ESD/ARP/pifsc-ai-data-repository/" 0  # Start at depth 0
-          echo "]" >> nested-prefixes.json
 
       - name: Commit and push changes
         env:
