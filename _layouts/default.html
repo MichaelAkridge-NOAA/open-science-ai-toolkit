@@ -58,7 +58,8 @@
   <script>
     const jsonUrl = 'https://raw.githubusercontent.com/MichaelAkridge-NOAA/open-science-ai-toolkit/refs/heads/gh-pages/nested-prefixes.json'; // Replace with the actual path to your JSON file
     const bucketName = "nmfs_odp_pifsc"; // Your bucket name
-    let currentPath = [];
+    let rootNode = null; // Store the root node
+    let currentPath = []; // Track the breadcrumb path
 
     // Fetch and render the bucket data
     fetch(jsonUrl)
@@ -69,15 +70,17 @@
         return response.json();
       })
       .then(data => {
-        currentPath = [data[0]];
+        rootNode = data[0]; // Store the root node for reset
+        currentPath = [rootNode];
         updateBreadcrumbs();
-        renderTree(data[0], document.getElementById('bucket-contents'));
+        renderTree(rootNode, document.getElementById('bucket-contents'));
       })
       .catch(error => {
         console.error('Error fetching JSON:', error);
         document.getElementById('bucket-contents').textContent = 'Failed to load data.';
       });
 
+    // Function to render folders and files recursively
     function renderTree(node, container) {
       container.innerHTML = ''; // Clear the container
       const ul = document.createElement('ul');
@@ -144,9 +147,15 @@
         breadcrumb.textContent = item.prefix.split('/').filter(Boolean).pop() || 'Home';
         breadcrumb.classList.add('breadcrumb');
         breadcrumb.onclick = () => {
-          currentPath = currentPath.slice(0, index + 1);
+          if (index === 0) {
+            // Reset to the root node
+            currentPath = [rootNode];
+            renderTree(rootNode, document.getElementById('bucket-contents'));
+          } else {
+            // Navigate to the selected breadcrumb
+            currentPath = currentPath.slice(0, index + 1);
+          }
           updateBreadcrumbs();
-          renderTree(item, document.getElementById('bucket-contents'));
         };
 
         breadcrumbNav.appendChild(breadcrumb);
