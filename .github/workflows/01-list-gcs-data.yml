@@ -35,7 +35,7 @@ jobs:
           # Parameters
           ROOT_PREFIX="PIFSC/ESD/ARP/pifsc-ai-data-repository/"
           MAX_DEPTH=5
-          EXCLUDED_FOLDERS=("raw" "images" "labels" "logs" "database")
+          EXCLUDED_FOLDERS=("raw" "images" "labels" "logs" "database" "models")
           OUTPUT_FILE="nested-prefixes.json"
 
           # Initialize JSON file
