@@ -47,10 +47,28 @@ jobs:
 
             for excluded in "${EXCLUDED_FOLDERS[@]}"; do
               if [[ "$prefix" == *"/$excluded/"* ]]; then
+                # Check if README.md exists in the excluded folder
+                readme_response=$(aws s3api list-objects-v2 \
+                  --bucket nmfs_odp_pifsc \
+                  --prefix "${prefix}README.md" \
+                  --endpoint-url https://storage.googleapis.com || echo "{}")
+
+                readme=$(echo "$readme_response" | jq -r '.Contents[]?.Key // empty')
+
+                if [ -n "$readme" ]; then
+                  json_object=$(jq -n \
+                    --arg prefix "$prefix" \
+                    --argjson prefixes "[\"${prefix}README.md\"]" \
+                    '{prefix: $prefix, prefixes: $prefixes}')
+
+                  jq ". += [$json_object]" $OUTPUT_FILE > tmp.json && mv tmp.json $OUTPUT_FILE
+                fi
+
                 return
               fi
             done
 
+            # Fetch sub-prefixes for allowed folders
             response=$(aws s3api list-objects-v2 \
               --bucket nmfs_odp_pifsc \
               --prefix "$prefix" \
@@ -82,5 +100,5 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add nested-prefixes.json
-          git commit -m "Updated all nested prefixes with exclusion logic" || echo "No changes to commit"
+          git commit -m "Updated all nested prefixes with exclusion logic and README.md inclusion" || echo "No changes to commit"
           git push origin gh-pages
