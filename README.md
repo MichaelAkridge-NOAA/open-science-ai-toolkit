@@ -20,7 +20,7 @@ flowchart LR
 ### Notebooks
 A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 
-| Category                                         | Notebook Name                                      | Description                                                                               | Deploy  | 
+| Category                                         |  Name                                      | Description                                                                               | Deploy  | 
 | ------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------|
 | Data Preparation                                  | **Data Prep**                                      | Prepares training and testing datasets, and verifies metadata                             | placeholder| 
 | Model Training                                    | **Train YOLO11 Model**                            | Configures parameters and trains YOLOv11 models                                           | placeholder  | 
