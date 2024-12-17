@@ -85,6 +85,7 @@ def remap_class_ids(label_dir, old_id, new_id):
     print(f"Class IDs remapped from {old_id} to {new_id}.")
 
 # 5. Split Dataset
+# to do fix test split with 0.0 rounding 
 def split_dataset(images_dir, annotations_dir, output_dir, train_ratio=0.7, val_ratio=0.2, test_ratio=0.1):
     """
     Splits a dataset into train, validation, and test sets.
