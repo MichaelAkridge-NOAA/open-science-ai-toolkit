@@ -39,7 +39,7 @@ filter_images_with_labels(
     output_folder="path/to/output_images"
 )
 ```
-### 2. Create Background Images with Empty Labels
+### 2. Create Labels for Background Images
 ```
 from noaa_ai_tools import create_background_labels
 
@@ -49,7 +49,7 @@ create_background_labels(
     output_label_folder="path/to/output_labels"
 )
 ```
-### 3. Validate YOLO Format
+### 3. Validate YOLO Format of dataset
 
 ```
 from noaa_ai_tools import validate_yolo_format
@@ -70,7 +70,7 @@ remap_class_ids(
     new_id="1"   # New class ID
 )
 ```
-### 5. Split Dataset
+### 5. Split Dataset into Train/Val/Test
 ```
 from noaa_ai_tools import split_dataset
 
