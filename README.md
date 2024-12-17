@@ -81,8 +81,18 @@ split_dataset(
     train_ratio=0.7, val_ratio=0.2, test_ratio=0.1
 )
 ```
-
-
+## File Structure Example
+project-dataset-name/
+│
+├── input/                  # Input images and labels
+│   ├── images/             # Original images
+│   └── labels/             # YOLO format labels
+│
+└── output/                 # Outputs from the toolkit
+    ├── filtered_images/    # Filtered images with labels
+    ├── background_images/  # Background images with empty labels
+    ├── splits/             # Train/val/test splits
+    └── logs/               # Logs
 
 ## Apps
 *Placeholder for applications that streamline workflows.*
