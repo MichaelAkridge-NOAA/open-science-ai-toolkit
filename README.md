@@ -16,8 +16,27 @@ flowchart LR
   G --> H[Model Monitoring]
   H --> ABC
 ```
+## Installation
+To install the entire toolkit:
+```
+pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
+```
+The `noaa_ai_tools` subpackage provides functionalities like:
+- **Filter Images with Labels**
+- **Create Background Images with Empty Labels**
+- **Validate YOLO Format**
+- **Remap Class IDs**
+- **Split Dataset (train, val, test)**
 
-### Notebooks
+## Example Usage
+```
+from noaa_ai_tools import filter_images_with_labels
+filter_images_with_labels("path/to/images", "path/to/labels", "output/")
+```
+## Apps
+*Placeholder for applications that streamline workflows.*
+
+## Notebooks
 A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 
 | Category                                         |  Name                                      | Description                                                                               | Deploy  | 
@@ -29,11 +48,6 @@ A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 | Model Evaluation                                  | **Evaluate Models**                                | Generates metrics and performs comprehensive model testing                                | placeholder|
 | Model Deployment                                  | **Publish Models**                                 | Publishes trained models to public repositories for community access                       | placeholder  | 
 
-### Scripts
-*Placeholder for various scripts that automate critical tasks.*
-
-### Apps
-*Placeholder for applications that streamline workflows.*
 ----------
 #### Disclaimer
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project content is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
