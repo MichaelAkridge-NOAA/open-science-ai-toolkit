@@ -29,7 +29,7 @@ The `noaa_ai_tools` subpackage provides functionalities like:
 - - **Validate YOLO Format**
 - - **Remap Class IDs**
 - - **Split Dataset (train, val, test)**
-- **Model Training**: Train and manage deep learning models, including support for YOLO models from Ultralytics.
+- **Model Training**: Train and manage deep learning models, including support for YOLO models from Ultralytics(https://github.com/ultralytics/ultralytics).
 - **Model Exporting**: Export trained models to various formats, including ONNX, TensorFlow Lite, Edge TPU, and NCNN.
 
 ## Example
@@ -134,6 +134,7 @@ split_dataset(
 )
 ```
 ## File Structure Example
+```
 project-dataset-name/
 │
 ├── input/                  # Input images and labels
@@ -145,7 +146,7 @@ project-dataset-name/
     ├── background_images/  # Background images with empty labels
     ├── splits/             # Train/val/test splits
     └── logs/               # Logs
-
+```
 ## Apps
 *Placeholder for applications that streamline workflows.*
 
@@ -165,5 +166,9 @@ A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 #### Disclaimer
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project content is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
 
-##### License
-See the [LICENSE.md](./LICENSE.md) for details
+#### License
+- This code is licensed as detailed in the [LICENSE.md](./LICENSE.md) file.
+- For licensing details related to YOLO training, please refer to the [Ultralytics license](https://github.com/ultralytics/ultralytics?tab=readme-ov-file#license)
+
+#### Credits
+- https://github.com/ultralytics/ultralytics
