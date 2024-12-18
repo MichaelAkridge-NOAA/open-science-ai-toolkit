@@ -59,8 +59,6 @@ exporter.export_model(['onnx', 'tflite', 'edgetpu', 'ncnn'])  # List of formats 
 # Runs validation using the specified validation dataset and prints out the metrics.
 validation_metrics = model_manager.validate('path/to/validation_data.yaml')
 print("Validation Completed with Metrics:", validation_metrics)
-
-
 ```
 ### Overview
 ```mermaid
