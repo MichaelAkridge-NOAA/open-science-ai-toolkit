@@ -1,1 +1,6 @@
 # placeholder - noaa_ai_tools has no external dependencies at this time
+#torch
+#torchvision
+#matplotlib
+#numpy
+ultralytics

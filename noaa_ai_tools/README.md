@@ -1,6 +1,67 @@
 # Open Science AI Toolkit
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
 
+## Installation
+To install the entire toolkit:
+```
+pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
+```
+
+## Features
+
+- **Data Preparation**: Easily prepare your datasets for training with functions for filtering and validating annotations.
+- **Image Processing**: Tools for image filtering and creating background images with empty labels.
+- **Model Training**: Train and manage deep learning models, including support for YOLO models from Ultralytics.
+- **Model Exporting**: Export trained models to various formats, including ONNX, TensorFlow Lite, Edge TPU, and NCNN.
+
+```
+from noaa_ai_tools import DeviceManager, ModelManager, ModelExporter
+
+# Initialize the device
+# This sets up which GPU (or CPU if no GPU is available) will be used for training.
+device = DeviceManager.initialize_device("0")  # "0" is the GPU index; use "0" to select the first GPU. If no GPU it will default to CPU
+
+# Setup and train the model
+# ModelManager is responsible for all aspects of model training and handling.
+model_manager = ModelManager("yolo11m.pt", device)  # Load the YOLO model specified by name. | Options: "yolo11n.pt", "yolo11s.pt","yolo11m.pt","yolo11l.pt","yolo11x.pt"
+
+# Define training configuration
+# This dictionary includes all settings needed for training the YOLO model.
+train_config = {
+    'data': 'path/to/data.yaml',  # Path to dataset configuration file (required).
+    'epochs': 100,               # Total number of training epochs (required).
+    'imgsz': 640,                # Image size: dimensions to which the images will be resized (required).
+    'batch': 32,                 # Batch size: number of images processed per batch (required).
+    'lr0': 0.001,                # Initial learning rate (required).
+    'lrf': 0.0001,               # Final learning rate, used in cosine annealing schedule (optional, defaults to a preset value if not provided).
+    'optimizer': 'AdamW',        # Type of optimizer to use (required).
+    'device': device,            # Device to use for training (required). Default via DeviceManager
+    'save_period': 10,           # Frequency of saving the model (in epochs) (optional).
+    'patience': 10,              # Patience for early stopping (optional).
+    'augment': True,             # Enable data augmentation (optional).
+    'mosaic': True,              # Enable mosaic augmentation (optional).
+    'mixup': True,               # Enable mixup augmentation (optional).
+    'cos_lr': True,              # Use cosine learning rate scheduler (optional).
+    'project': 'training_logs'   # Directory for saving training logs (optional).
+}
+model_manager.train(train_config)  # Start the training process with the specified configurations.
+
+# Save the trained model
+# Saves the model weights to the specified path after training is complete.
+model_manager.save_model("path/to/save_model.pt")
+
+# Export the trained model
+# Exports the model to different formats for deployment or inference on different platforms.
+exporter = ModelExporter(model_manager.model)
+exporter.export_model(['onnx', 'tflite', 'edgetpu', 'ncnn'])  # List of formats to export.
+
+# Validate the model
+# Runs validation using the specified validation dataset and prints out the metrics.
+validation_metrics = model_manager.validate('path/to/validation_data.yaml')
+print("Validation Completed with Metrics:", validation_metrics)
+
+
+```
 ### Overview
 ```mermaid
 flowchart LR
@@ -16,18 +77,6 @@ flowchart LR
   G --> H[Model Monitoring]
   H --> ABC
 ```
-## Installation
-To install the entire toolkit:
-```
-pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
-```
-The `noaa_ai_tools` subpackage provides functionalities like:
-- **Filter Images with Labels**
-- **Create Background Images with Empty Labels**
-- **Validate YOLO Format**
-- **Remap Class IDs**
-- **Split Dataset (train, val, test)**
-
 ## Example Usage
 ### 1. Filter Images with Labels
 ```
