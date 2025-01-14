@@ -18,6 +18,7 @@ Open source suite of tools, workflows, and processes designed to accelerate Open
 5. [**Notebooks**](#notebooks)  
 
 ### Overview
+#### Python Toolkit
 ```mermaid
 flowchart LR
   subgraph ABC[Data Preparation]
@@ -32,9 +33,6 @@ flowchart LR
   G --> H[Model Monitoring]
   H --> ABC
 ```
-
-
-
 ## Installation
 To install the entire toolkit:
 ```
