@@ -1,5 +1,5 @@
 # YOLO Object Detection Training GUI Application
-
+![app](./docs/screenshot.png)
 ## Requirements
 ```
 PyQt5
