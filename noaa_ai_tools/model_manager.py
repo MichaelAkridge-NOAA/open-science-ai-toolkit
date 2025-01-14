@@ -1,39 +1,35 @@
-# model_manager.py
-
 from ultralytics import YOLO
-from .device_manager import DeviceManager
 
 class ModelManager:
     def __init__(self, model_path, device):
         """
-        Initialize the model with a given model name and device.
+        Initialize the model with a given model path and device.
         """
-        self.model = YOLO(model_path).model.to(device)
+        self.model = YOLO(model_path)
         self.device = device
+        self.model.to(self.device)
 
     def train(self, config):
         """
-        Train the model using a provided configuration dictionary that includes
-        all necessary parameters for the training process.
+        Train the model using a provided configuration dictionary.
         """
         print("Starting training with the following configuration:", config)
-        # Pass the entire configuration dictionary to the train method
         self.model.train(
             data=config['data'],
             epochs=config['epochs'],
             imgsz=config['imgsz'],
-            batch_size=config['batch'],
+            batch=config['batch'],
             lr0=config['lr0'],
-            lrf=config.get('lrf', 0.01),  # Use a default if not specified
-            optimizer=config['optimizer'],
+            lrf=config.get('lrf', 0.01),
+            optimizer=config.get('optimizer', 'SGD'),
             device=self.device,
-            save_period=config.get('save_period', 5),
-            patience=config.get('patience', 3),
-            augment=config.get('augment', False),
-            mosaic=config.get('mosaic', False),
-            mixup=config.get('mixup', False),
+            save_period=config.get('save_period', 10),
+            patience=config.get('patience', 5),
+            augment=config.get('augment', True),
+            mosaic=config.get('mosaic', True),
+            mixup=config.get('mixup', True),
             cos_lr=config.get('cos_lr', False),
-            project=config.get('project', 'runs/train')
+            project=config.get('project', 'runs/train'),
         )
         print("Training complete!")
 
@@ -41,12 +37,12 @@ class ModelManager:
         """
         Save the trained model at the specified path.
         """
-        self.model.save(save_path)
+        self.model.export(save_dir=save_path)
         print(f"Model saved to {save_path}")
 
     def validate(self, data_path):
         """
-        Validate the model using the specified validation dataset and print the evaluation metrics.
+        Validate the model using the specified validation dataset.
         """
         metrics = self.model.val(data=data_path, device=self.device)
         print("Validation metrics:", metrics)
