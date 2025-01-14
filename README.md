@@ -1,5 +1,21 @@
 # Open Science AI Toolkit
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
+# Table of Contents
+
+1. [Open Science AI Toolkit Overview](#overview)  
+2. [Installation](#installation)  
+3. [Features](#features)  
+   - [Dataset Preparation](#features)  
+     - [Filter Images with Labels](#1-filter-images-with-labels)  
+     - [Create Labels for Background Images](#2-create-labels-for-background-images)  
+     - [Validate YOLO Format](#3-validate-yolo-format-of-dataset)  
+     - [Remap Class IDs](#4-remap-class-ids)  
+     - [Split Dataset (train, val, test)](#5-split-dataset-into-trainvaltest)  
+   - [Model Training](#features)  
+   - [Model Exporting](#features)  
+4. [**Applications**](#apps)  
+   - [YOLO Object Detection Training GUI Application](#yolo-object-detection-training-gui-application)  
+5. [**Notebooks**](#notebooks)  
 
 ### Overview
 ```mermaid
