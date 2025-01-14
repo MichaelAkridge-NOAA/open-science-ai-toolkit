@@ -16,6 +16,9 @@ flowchart LR
   G --> H[Model Monitoring]
   H --> ABC
 ```
+
+
+
 ## Installation
 To install the entire toolkit:
 ```
@@ -141,7 +144,9 @@ project-dataset-name/
     └── logs/               # Logs
 ```
 ## Apps
-*Placeholder for applications that streamline workflows.*
+### YOLO Object Detection Training GUI Application
+[![app](./apps/docs/screenshot.png)](./apps)
+
 
 ## Notebooks
 A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
