@@ -37,48 +37,41 @@ The `noaa_ai_tools` subpackage provides functionalities like:
 from noaa_ai_tools import DeviceManager, ModelManager, ModelExporter
 
 # Initialize the device
-# This sets up which GPU (or CPU if no GPU is available) will be used for training.
-device = DeviceManager.initialize_device("0")  # "0" is the GPU index; use "0" to select the first GPU. If no GPU it will default to CPU
+device = DeviceManager.initialize_device("0")  # Use "0" for GPU 0, "cpu" for CPU
 
 # Setup and train the model
-# ModelManager is responsible for all aspects of model training and handling.
-model_manager = ModelManager("yolo11m.pt", device)  # Load the YOLO model specified by name. | Options: "yolo11n.pt", "yolo11s.pt","yolo11m.pt","yolo11l.pt","yolo11x.pt"
+model_manager = ModelManager("yolo11m.pt", device)
 
 # Define training configuration
-# This dictionary includes all settings needed for training the YOLO model.
 train_config = {
-    'data': 'path/to/data.yaml',  # Path to dataset configuration file (required).
-    'epochs': 100,               # Total number of training epochs (required).
-    'imgsz': 640,                # Image size: dimensions to which the images will be resized (required).
-    'batch': 32,                 # Batch size: number of images processed per batch (required).
-    'lr0': 0.001,                # Initial learning rate (required).
-    'lrf': 0.0001,               # Final learning rate, used in cosine annealing schedule (optional, defaults to a preset value if not provided).
-    'optimizer': 'AdamW',        # Type of optimizer to use (required).
-    'device': device,            # Device to use for training (required). Default via DeviceManager
-    'save_period': 10,           # Frequency of saving the model (in epochs) (optional).
-    'patience': 10,              # Patience for early stopping (optional).
-    'augment': True,             # Enable data augmentation (optional).
-    'mosaic': True,              # Enable mosaic augmentation (optional).
-    'mixup': True,               # Enable mixup augmentation (optional).
-    'cos_lr': True,              # Use cosine learning rate scheduler (optional).
-    'project': 'training_logs'   # Directory for saving training logs (optional).
+    'data': 'path/to/data.yaml',  # Dataset configuration file
+    'epochs': 100,               # Total training epochs
+    'imgsz': 640,                # Image size
+    'batch': 32,                 # Batch size
+    'lr0': 0.001,                # Initial learning rate
+    'lrf': 0.0001,               # Final learning rate
+    'optimizer': 'AdamW',        # Optimizer
+    'device': device,            # Device (handled internally)
+    'save_period': 10,           # Save model every 10 epochs
+    'patience': 10,              # Early stopping patience
+    'augment': True,             # Enable data augmentation
+    'mosaic': True,              # Enable mosaic augmentation
+    'mixup': True,               # Enable mixup augmentation
+    'cos_lr': True,              # Use cosine learning rate
+    'project': 'training_logs',  # Save training logs here
 }
-model_manager.train(train_config)  # Start the training process with the specified configurations.
+model_manager.train(train_config)  # Start training
 
 # Save the trained model
-# Saves the model weights to the specified path after training is complete.
 model_manager.save_model("path/to/save_model.pt")
 
 # Export the trained model
-# Exports the model to different formats for deployment or inference on different platforms.
 exporter = ModelExporter(model_manager.model)
-exporter.export_model(['onnx', 'tflite', 'edgetpu', 'ncnn'])  # List of formats to export.
+exporter.export_model(['onnx', 'tflite', 'edgetpu', 'ncnn'])  # Export in multiple formats
 
 # Validate the model
-# Runs validation using the specified validation dataset and prints out the metrics.
 validation_metrics = model_manager.validate('path/to/validation_data.yaml')
 print("Validation Completed with Metrics:", validation_metrics)
-
 ```
 ## Example Usage
 ### 1. Filter Images with Labels
