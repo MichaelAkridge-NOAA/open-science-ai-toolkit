@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="open-science-ai-toolkit",
-    version="0.9.0",
+    version="0.9.1",
     author="Michael Akridge",
     author_email="michael.akridge@noaa.gov",
     description="A comprehensive toolkit for AI-driven analysis and dataset management at NOAA. It includes functions for dataset preparation, image filtering, annotation validation, and model training.",
