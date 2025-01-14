@@ -4,6 +4,9 @@ import os
 class DeviceManager:
     @staticmethod
     def initialize_device(gpu_index="0"):
+        """
+        Initialize the device based on the given GPU index. Defaults to CPU if no GPU is available.
+        """
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu_index
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f"Using device: {device}")
