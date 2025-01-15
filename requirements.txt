@@ -3,4 +3,5 @@
 #torchvision
 #matplotlib
 #numpy
+PyQt5
 ultralytics

@@ -2,28 +2,32 @@ from setuptools import setup, find_packages
 
 setup(
     name="open-science-ai-toolkit",
-    version="0.9.1",
+    version="0.9.2",
     author="Michael Akridge",
     author_email="michael.akridge@noaa.gov",
-    description="A comprehensive toolkit for AI-driven analysis and dataset management at NOAA. It includes functions for dataset preparation, image filtering, annotation validation, and model training.",
+    description="A toolkit for AI-driven analysis, including a GUI and a Python library.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit",
     packages=find_packages(),
-    install_requires=['ultralytics'],
+    install_requires=[
+        'PyQt5', 
+        'ultralytics'
+    ],
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Artificial Intelligence"
     ],
-    python_requires=">=3.7",
-    keywords="AI, NOAA, datasets, image processing, YOLO, machine learning, data preparation, annotation",
+    python_requires=">=3.8",
+    entry_points={
+        'console_scripts': [
+            'noaa-ai-toolkit-gui=gui.main_app:main',  # Launch the GUI
+        ],
+    },
+    keywords="AI, NOAA, datasets, GUI, toolkit, machine learning",
     project_urls={
         "Bug Reports": "https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit/issues",
         "Source": "https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit",

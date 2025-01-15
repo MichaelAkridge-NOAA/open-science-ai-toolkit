@@ -3,3 +3,4 @@
 /notebooks/train/yolo11/.ipynb_checkpoints
 /notebooks/prep/.ipynb_checkpoints
 /notebooks/train/yolov8/.ipynb_checkpoints
+*.pyc
