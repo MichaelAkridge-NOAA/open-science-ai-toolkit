@@ -24,7 +24,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         'console_scripts': [
-            'noaa-ai-toolkit-gui=gui.main_app:main',  # Launch the GUI
+            'noaa-ai-gui=noaa_ai_gui.main_app:main',  # Launch the GUI
         ],
     },
     keywords="AI, NOAA, datasets, GUI, toolkit, machine learning",
