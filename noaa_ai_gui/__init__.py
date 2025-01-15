@@ -8,4 +8,4 @@ __version__ = "0.1.0"
 __author__ = "Michael Akridge"
 __email__ = "michael.akridge@noaa.gov"
 
-from .main_app import MainApp
+from .main import MainApp
