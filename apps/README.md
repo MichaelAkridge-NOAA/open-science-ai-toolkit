@@ -9,7 +9,7 @@ noaa-ai-gui
 ```
 ![app](./docs/screenshot2.png)
 
-# YOLO Object Detection Training GUI Application
+# OR - Just YOLO Object Detection Training GUI Application
 ![app](./docs/screenshot.png)
 ## Requirements
 ```
