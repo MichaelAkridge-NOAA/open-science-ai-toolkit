@@ -1,5 +1,5 @@
 # In Dev
-## YOLO Gui - Slapped together gui with custom functions
+## YOLO Gui - Slapped together GUI with custom functions
 ```
 pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
 ```
@@ -7,7 +7,10 @@ pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.g
 ```
 noaa-ai-gui
 ```
-![app](./docs/screenshot2.png)
+![app](../docs/screenshot2.png)
+
+# OR - Just YOLO Object Detection Training GUI Application
+![app](../docs/screenshot.png)
 
 
 ## Using the GUI
