@@ -7,10 +7,10 @@ class DatasetViewerPage(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Dataset Viewer Page"))
+        layout.addWidget(QLabel("Dataset Viewer Page - PLACEHOLDER"))
         
         # Viewer text area
-        self.viewer_text = QTextEdit("Dataset details will appear here.")
+        self.viewer_text = QTextEdit("PLACEHOLDER | Dataset details for QA/QC will appear here. | PLACEHOLDER")
         layout.addWidget(self.viewer_text)
 
         self.setLayout(layout)

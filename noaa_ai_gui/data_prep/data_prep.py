@@ -7,7 +7,7 @@ class DataPrepPage(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Data Preparation Page"))
+        layout.addWidget(QLabel("PLACEHOLDER Data Preparation Page PLACEHOLDER. Will include noaa-ai-tools data prep tools later like dataset split, yolo verify, etc"))
         
         # Load dataset button
         self.load_dataset_btn = QPushButton("Load Dataset")
