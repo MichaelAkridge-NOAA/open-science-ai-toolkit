@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QListWidget, QStackedWidget
-from model_training.train import TrainingPage
-from data_prep.data_prep import DataPrepPage
-from dataset_viewer.dataset_viewer import DatasetViewerPage
-from model_evaluation.model_eval import ModelEvalPage
+from .model_training.train import TrainingPage
+from .data_prep.data_prep import DataPrepPage
+from .dataset_viewer.dataset_viewer import DatasetViewerPage
+from .model_evaluation.model_eval import ModelEvalPage
 
 class MainApp(QWidget):
     def __init__(self):
