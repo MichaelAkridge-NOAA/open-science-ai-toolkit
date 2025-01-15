@@ -31,8 +31,13 @@ class MainApp(QWidget):
     def display_page(self, index):
         self.pages.setCurrentIndex(index)
 
-if __name__ == "__main__":
+# Entry point for the application
+def main():
     app = QApplication([])
     main_app = MainApp()
     main_app.show()
     app.exec_()
+
+# This allows both manual execution and command-line entry point
+if __name__ == "__main__":
+    main()
