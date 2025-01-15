@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="open-science-ai-toolkit",
-    version="0.9.2",
+    version="0.9.3",
     author="Michael Akridge",
     author_email="michael.akridge@noaa.gov",
     description="A toolkit for AI-driven analysis, including a GUI and a Python library.",
@@ -24,7 +24,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         'console_scripts': [
-            'noaa-ai-toolkit-gui=gui.main_app:main',  # Launch the GUI
+            'noaa-ai-gui=noaa_ai_gui.main_app:main',  # Launch the GUI
         ],
     },
     keywords="AI, NOAA, datasets, GUI, toolkit, machine learning",
