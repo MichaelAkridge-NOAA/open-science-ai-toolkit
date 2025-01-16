@@ -1,6 +1,6 @@
 # Open Science AI Toolkit
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
-[![app](./docs/screenshot03.png)](./noaa-ai-gui)
+[![app](./docs/screenshot03.png)](./noaa_ai_gui)
 
 # Table of Contents
 1. [Open Science AI Toolkit Overview](#overview)  
@@ -160,7 +160,7 @@ project-dataset-name/
 ```
 ## Apps
 ### Open Science AI Toolkit - GUI
-[![app](./docs/screenshot03.png)](./noaa-ai-gui)
+[![app](./docs/screenshot03.png)](./noaa_ai_gui)
 
 
 ## Notebooks

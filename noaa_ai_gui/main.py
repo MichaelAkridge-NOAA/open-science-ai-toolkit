@@ -4,10 +4,6 @@ from PyQt5.QtGui import QIcon, QPixmap, QPainter, QImage, QFont, QCursor
 from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QEvent  # Include QEvent here
 from PyQt5.QtSvg import QSvgRenderer
 from qdarktheme import setup_theme
-from .model_training.train import TrainingPage
-from .data_prep.data_prep import DataPrepPage
-from .dataset_viewer.dataset_viewer import DatasetViewerPage
-from .model_evaluation.model_eval import ModelEvalPage
 
 def get_colored_svg_icon(path, color):
     renderer = QSvgRenderer(path)
@@ -217,12 +213,22 @@ class MainApp(QMainWindow):
         self.tabs.setCurrentIndex(index)
 
 
+if __name__ == "__main__" and __package__ is None:
+    from model_training.train import TrainingPage
+    from data_prep.data_prep import DataPrepPage
+    from dataset_viewer.dataset_viewer import DatasetViewerPage
+    from model_evaluation.model_eval import ModelEvalPage
+else:
+    from .model_training.train import TrainingPage
+    from .data_prep.data_prep import DataPrepPage
+    from .dataset_viewer.dataset_viewer import DatasetViewerPage
+    from .model_evaluation.model_eval import ModelEvalPage
+
 def main():
     app = QApplication(sys.argv)
     setup_theme("dark")
     main_app = MainApp()
     main_app.show()
     app.exec_()
-
 if __name__ == "__main__":
     main()
