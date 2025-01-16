@@ -1,7 +1,8 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QTabWidget, QPushButton, QLabel, QHBoxLayout, QMainWindow, QToolButton)
-from PyQt5.QtGui import QIcon, QPixmap, QPainter, QImage, QFont, QCursor
-from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QEvent  # Include QEvent here
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTabWidget, QPushButton, QLabel, QHBoxLayout, QMainWindow, QToolButton
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QImage, QFont
+from PyQt5.QtCore import Qt, QSize, QPoint
 from PyQt5.QtSvg import QSvgRenderer
 from qdarktheme import setup_theme
 
@@ -20,72 +21,48 @@ def get_colored_svg_icon(path, color):
     painter.end()
     return QIcon(QPixmap.fromImage(colored_image))
 
-class CustomTitleBar(QWidget):
+
+class CustomTitleBar(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(CustomTitleBar, self).__init__(parent)
         self.parent = parent
-        self.setFixedHeight(45)  # Increase title bar height to match larger buttons
+        self.setFixedHeight(45)
         self.setMouseTracking(True)
         self._startPos = None
 
-        # Layout for the title bar
         self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins
+        self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
 
-        # Add logo
         self.logo = QLabel(self)
-        self.logo.setPixmap(
-            QPixmap("./icons/logo.png").scaled(35, 35, Qt.AspectRatioMode.KeepAspectRatio, Qt.SmoothTransformation)
-        )
+        self.logo.setPixmap(QPixmap("./icons/logo.png").scaled(35, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.logo.setFixedSize(45, 45)
         self.layout.addWidget(self.logo)
 
-        # Add title
         self.title = QLabel(parent.windowTitle(), self)
-        self.title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-        self.title.setStyleSheet(
-            """
-            QLabel {
-                font-size: 14pt;
-                font-weight: bold;
-                color: white;
-                margin-left: 8px;
-            }
-            """
-        )
+        self.title.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        self.title.setStyleSheet("QLabel { font-size: 14pt; font-weight: bold; color: white; margin-left: 8px; }")
         self.layout.addWidget(self.title, stretch=1)
 
-        # Add buttons
         self.min_button = QToolButton(self)
         self.min_button.setIcon(get_colored_svg_icon("./icons/circle.svg", Qt.green))
-        self.min_button.setFixedSize(QSize(24, 24))  # Increased size
+        self.min_button.setFixedSize(QSize(24, 24))
         self.min_button.clicked.connect(parent.showMinimized)
 
         self.max_button = QToolButton(self)
         self.max_button.setIcon(get_colored_svg_icon("./icons/circle.svg", Qt.yellow))
-        self.max_button.setFixedSize(QSize(24, 24))  # Increased size
+        self.max_button.setFixedSize(QSize(24, 24))
         self.max_button.clicked.connect(self.toggleMaximizeRestore)
 
         self.close_button = QToolButton(self)
         self.close_button.setIcon(get_colored_svg_icon("./icons/circle.svg", Qt.red))
-        self.close_button.setFixedSize(QSize(24, 24))  # Increased size
+        self.close_button.setFixedSize(QSize(24, 24))
         self.close_button.clicked.connect(parent.close)
 
         buttons = [self.min_button, self.max_button, self.close_button]
         for button in buttons:
-            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            button.setStyleSheet(
-                """
-                QToolButton {
-                    border: none;
-                    background-color: transparent;
-                }
-                QToolButton:hover {
-                    background-color: rgba(255, 255, 255, 0.1);
-                }
-                """
-            )
+            button.setFocusPolicy(Qt.NoFocus)
+            button.setStyleSheet("QToolButton { border: none; background-color: transparent; } QToolButton:hover { background-color: rgba(255, 255, 255, 0.1); }")
             self.layout.addWidget(button)
 
     def toggleMaximizeRestore(self):
@@ -108,10 +85,69 @@ class CustomTitleBar(QWidget):
         self._startPos = None
         event.accept()
 
+class MainApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowTitle("Open Science AI Toolbox")
+        self.setGeometry(100, 100, 800, 600)
 
+        self.central_widget = QWidget(self)
+        self.central_widget.setObjectName("MainContainer")
+        self.setCentralWidget(self.central_widget)
+        self.initUI()
+        # Apply styles for rounded corners
+        self.central_widget.setStyleSheet(
+            """
+            #MainContainer {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #1e3c72, stop:1 #2a5298);
+                border-radius: 20px; /* Rounded corners */
+            }
+            """
+        )
+        # Size grip with customized styling
+        self.sizeGripBR = QtWidgets.QSizeGrip(self.central_widget)
+        self.sizeGripBR.setStyleSheet("QSizeGrip { width: 15px; height: 15px; background: transparent; }")
+        self.sizeGripBR.setGeometry(self.width() - 20, self.height() - 20, 15, 15)
+
+        # Ensure the size grip moves with the window resizing
+        self.central_widget.resizeEvent = self.onResize
+
+    def onResize(self, event):
+        self.sizeGripBR.setGeometry(self.width() - 20, self.height() - 20, 15, 15)
+        super().resizeEvent(event)
+
+    def initUI(self):
+        layout = QVBoxLayout(self.central_widget)
+        layout.setContentsMargins(10, 10, 10, 10)
+
+        self.titleBar = CustomTitleBar(self)
+        layout.addWidget(self.titleBar)
+
+        # Assuming IntroPage and other pages are properly defined elsewhere in your application
+        self.introPage = IntroPage(self)
+        layout.addWidget(self.introPage)
+
+        self.tabs = QTabWidget()
+        icon_size = QSize(40, 40)
+        self.tabs.addTab(TrainingPage(), get_colored_svg_icon("./icons/gears.svg", Qt.white), "Training")
+        self.tabs.addTab(DataPrepPage(), get_colored_svg_icon("./icons/images.svg", Qt.white), "Data Preparation")
+        self.tabs.addTab(DatasetViewerPage(), get_colored_svg_icon("./icons/magnifying-glass.svg", Qt.white), "Dataset Viewer")
+        self.tabs.addTab(ModelEvalPage(), get_colored_svg_icon("./icons/chart-pie.svg", Qt.white), "Model Evaluation")
+        self.tabs.setIconSize(icon_size)
+        self.tabs.setVisible(False)
+        layout.addWidget(self.tabs)
+    def navigateTo(self, index):
+        self.introPage.setVisible(False)
+        self.tabs.setVisible(True)
+        self.tabs.setCurrentIndex(index)
+
+        
 
 
 class IntroPage(QWidget):
+    
     def __init__(self, main_app):
         super().__init__()
         layout = QVBoxLayout()
@@ -162,56 +198,6 @@ class IntroPage(QWidget):
 
         layout.addLayout(button_layout)
         self.setLayout(layout)
-
-class MainApp(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setWindowTitle("Open Science AI Toolbox")
-        self.setGeometry(100, 100, 800, 600)
-
-        # Central widget with rounded corners
-        self.central_widget = QWidget(self)
-        self.central_widget.setObjectName("MainContainer")
-        self.setCentralWidget(self.central_widget)
-        self.initUI()
-
-        # Apply styles for rounded corners
-        self.central_widget.setStyleSheet(
-            """
-            #MainContainer {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #1e3c72, stop:1 #2a5298);
-                border-radius: 20px; /* Rounded corners */
-            }
-            """
-        )
-
-    def initUI(self):
-        layout = QVBoxLayout(self.central_widget)
-        layout.setContentsMargins(5, 5, 5, 5)
-
-        self.titleBar = CustomTitleBar(self)
-        layout.addWidget(self.titleBar)
-
-        self.introPage = IntroPage(self)
-        layout.addWidget(self.introPage)
-
-        self.tabs = QTabWidget()
-        icon_size = QSize(40, 40)
-        self.tabs.addTab(TrainingPage(), get_colored_svg_icon("./icons/gears.svg", Qt.white), "Training")
-        self.tabs.addTab(DataPrepPage(), get_colored_svg_icon("./icons/images.svg", Qt.white), "Data Preparation")
-        self.tabs.addTab(DatasetViewerPage(), get_colored_svg_icon("./icons/magnifying-glass.svg", Qt.white), "Dataset Viewer")
-        self.tabs.addTab(ModelEvalPage(), get_colored_svg_icon("./icons/chart-pie.svg", Qt.white), "Model Evaluation")
-        self.tabs.setIconSize(icon_size)
-        self.tabs.setVisible(False)
-        layout.addWidget(self.tabs)
-
-    def navigateTo(self, index):
-        self.introPage.setVisible(False)
-        self.tabs.setVisible(True)
-        self.tabs.setCurrentIndex(index)
-
 
 if __name__ == "__main__" and __package__ is None:
     from model_training.train import TrainingPage
