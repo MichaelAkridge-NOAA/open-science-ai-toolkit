@@ -1,15 +1,14 @@
-# In Dev
 ## Open Science AI Toolkit - GUI
+### Note: In active development
+![app](../docs/screenshot03.png)
+## Install
 ```
 pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
 ```
-# Run - via CMD
+## Run - via CMD
 ```
 noaa-ai-gui
 ```
-![app](../apps/docs/screenshot3.png)
-
-
 ## Using the GUI
 - Device: Select CPU or GPU.
 - Model: Choose a YOLO model (e.g., yolo11n.pt).
