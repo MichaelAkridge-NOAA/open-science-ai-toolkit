@@ -5,3 +5,4 @@
 #numpy
 PyQt5
 ultralytics
+pyqtdarktheme

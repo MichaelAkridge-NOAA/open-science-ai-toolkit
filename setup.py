@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="open-science-ai-toolkit",
-    version="0.9.7",
+    version="0.9.8",
     author="Michael Akridge",
     author_email="michael.akridge@noaa.gov",
     description="A toolkit for AI-driven analysis, including a GUI and a Python library.",
@@ -12,7 +12,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         'PyQt5', 
-        'ultralytics'
+        'ultralytics',
+        'pyqtdarktheme'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.10",
