@@ -1,7 +1,8 @@
 # Open Science AI Toolkit
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
-# Table of Contents
+[![app](./docs/screenshot03.png)](./noaa-ai-gui)
 
+# Table of Contents
 1. [Open Science AI Toolkit Overview](#overview)  
 2. [Installation](#installation)  
 3. [Features](#features)  
@@ -158,8 +159,8 @@ project-dataset-name/
     └── logs/               # Logs
 ```
 ## Apps
-### YOLO Object Detection Training GUI Application
-[![app](./apps/docs/screenshot.png)](./apps)
+### Open Science AI Toolkit - GUI
+[![app](./docs/screenshot03.png)](./noaa-ai-gui)
 
 
 ## Notebooks
