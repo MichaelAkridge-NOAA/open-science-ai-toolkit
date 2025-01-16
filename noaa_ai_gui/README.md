@@ -40,3 +40,5 @@ nc: 1
 names: ['urchin']
 ```
 
+# credits - icons
+- https://fontawesome.com/
