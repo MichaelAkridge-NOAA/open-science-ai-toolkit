@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="open-science-ai-toolkit",
-    version="0.9.9",
+    version="0.5.1",
     author="Michael Akridge",
     author_email="michael.akridge@noaa.gov",
     description="A toolkit for AI-driven analysis, including a GUI and a Python library.",
