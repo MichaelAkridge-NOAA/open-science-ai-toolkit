@@ -72,12 +72,27 @@ class TrainingPage(QWidget):
         self.experimental_options = self.setup_experimental_options()
 
         # Add the group boxes to the horizontal layout
-        options_layout.addWidget(self.advanced_options)
         options_layout.addWidget(self.logging_options)
+        options_layout.addWidget(self.advanced_options)
         options_layout.addWidget(self.experimental_options)
 
         # Add the horizontal layout to the main vertical layout
         main_layout.addLayout(options_layout)
+
+
+        # Toggle for advanced options
+        self.advanced_toggle_btn = QPushButton("Show Advanced Options")
+        self.advanced_toggle_btn.setCheckable(True)
+        self.advanced_toggle_btn.setChecked(False)
+        self.advanced_toggle_btn.toggled.connect(self.toggle_advanced_options)
+        main_layout.addWidget(self.advanced_toggle_btn)
+
+        # Advanced options setup
+        #self.advanced_options = self.setup_advanced_options()
+        #main_layout.addWidget(self.advanced_options)
+
+
+
 
         # Start/Abort Buttons
         self.start_btn = QPushButton("Start Training")
@@ -96,18 +111,34 @@ class TrainingPage(QWidget):
 
         self.setLayout(main_layout)  # Set the main layout on the QWidget
 
+    def toggle_advanced_options(self, checked):
+        self.advanced_options.setVisible(checked)
+        self.logging_options.setVisible(checked)
+        self.experimental_options.setVisible(checked)
+        if checked:
+            self.advanced_toggle_btn.setText("Hide Advanced Options")
+        else:
+            self.advanced_toggle_btn.setText("Show Advanced Options")
+    
     def collect_settings_from_layout(self, layout, config):
         # Assuming the layout argument here refers to a QFormLayout
         for i in range(layout.rowCount()):
             widget = layout.itemAt(i, QFormLayout.FieldRole).widget()
             if widget:
+                name = widget.accessibleName()
                 if isinstance(widget, QLineEdit):
+                    text = widget.text()
                     try:
-                        config[widget.accessibleName()] = float(widget.text())
+                        # Convert to integer if the field is specifically listed, else float
+                        if name in ["save_period", "epochs", "batch", "imgsz"]:  # Add any other integer fields here
+                            config[name] = int(text)
+                        else:
+                            config[name] = float(text)
                     except ValueError:
-                        config[widget.accessibleName()] = widget.text()
+                        # Handle non-numeric inputs gracefully
+                        config[name] = text
                 elif isinstance(widget, QCheckBox):
-                    config[widget.accessibleName()] = widget.isChecked()
+                    config[name] = widget.isChecked()
     
     def setup_device_section(self, layout):
         # Device Selection
@@ -161,6 +192,7 @@ class TrainingPage(QWidget):
         self.advanced_options = QGroupBox("Advanced Options (Optional)")
         self.advanced_options.setCheckable(True)
         self.advanced_options.setChecked(False)
+        self.advanced_options.setVisible(False)  # Initially not visible
         adv_layout = QFormLayout()
 
         # Optimizer
@@ -186,28 +218,16 @@ class TrainingPage(QWidget):
         momentum_input.setAccessibleName("momentum")
         self.add_advanced_field_with_tooltip(adv_layout, "Momentum (SGD/Adam momentum):",
                                             "Momentum factor for optimizers.", momentum_input)
-
-        # Weight Decay
-        weight_decay_input = QLineEdit("0.0005")
-        weight_decay_input.setAccessibleName("weight_decay")
-        self.add_advanced_field_with_tooltip(adv_layout, "Weight Decay (L2 regularization):",
-                                            "Penalty for large model weights to prevent overfitting.", weight_decay_input)
-
-        # Cosine LR Scheduler
-        cosine_lr_checkbox = QCheckBox()
-        cosine_lr_checkbox.setAccessibleName("cosine_lr")
-        adv_layout.addRow(QLabel("Cosine LR Scheduler:"), cosine_lr_checkbox)
+        
+        # AMP (Automatic Mixed Precision)
+        amp_checkbox = QCheckBox()
+        amp_checkbox.setAccessibleName("amp")
+        adv_layout.addRow(QLabel("AMP (Automatic Mixed Precision):"), amp_checkbox)
 
         # Multi-Scale Training
         multi_scale_checkbox = QCheckBox()
         multi_scale_checkbox.setAccessibleName("multi_scale")
         adv_layout.addRow(QLabel("Multi-Scale Training:"), multi_scale_checkbox)
-
-        # Freeze Layers
-        freeze_layers_input = QLineEdit("0")
-        freeze_layers_input.setAccessibleName("freeze_layers")
-        self.add_advanced_field_with_tooltip(adv_layout, "Freeze Layers:",
-                                            "Freeze the first N layers of the model to fine-tune higher layers.", freeze_layers_input)
 
         self.advanced_options.setLayout(adv_layout)
         return self.advanced_options
@@ -217,23 +237,24 @@ class TrainingPage(QWidget):
         self.logging_options = QGroupBox("Logging and Checkpoints (Optional)")
         self.logging_options.setCheckable(True)
         self.logging_options.setChecked(False)
+        self.logging_options.setVisible(False)  # Initially not visible
         logging_layout = QFormLayout()
 
         # Project Directory
         project_dir_input = QLineEdit("YOLO_Project")
-        project_dir_input.setAccessibleName("project_dir")
+        project_dir_input.setAccessibleName("project")
         self.add_advanced_field_with_tooltip(logging_layout, "Project Directory:",
                                             "Name of the project directory to save training outputs.", project_dir_input)
 
         # Experiment Name
-        experiment_name_input = QLineEdit("Experiment_1")
-        experiment_name_input.setAccessibleName("experiment_name")
+        experiment_name_input = QLineEdit("yolo11_experiment_v1")
+        experiment_name_input.setAccessibleName("name")
         self.add_advanced_field_with_tooltip(logging_layout, "Experiment Name:",
                                             "Name of the training run for organized outputs.", experiment_name_input)
 
         # Save Model Weights
         save_weights_checkbox = QCheckBox()
-        save_weights_checkbox.setAccessibleName("save_weights")
+        save_weights_checkbox.setAccessibleName("save")
         logging_layout.addRow(QLabel("Save Model Weights:"), save_weights_checkbox)
 
         # Save Period (in epochs)
@@ -247,16 +268,27 @@ class TrainingPage(QWidget):
 
 
     def setup_experimental_options(self):
-        self.experimental_options = QGroupBox("Experimental Features (Optional)")
+        self.experimental_options = QGroupBox("Experimental Options (Optional)")
         self.experimental_options.setCheckable(True)
         self.experimental_options.setChecked(False)
+        self.experimental_options.setVisible(False)  # Initially not visible
         exp_layout = QFormLayout()
+        
+        # Cosine LR Scheduler
+        cosine_lr_checkbox = QCheckBox()
+        cosine_lr_checkbox.setAccessibleName("cos_lr")
+        exp_layout.addRow(QLabel("Cosine LR Scheduler:"), cosine_lr_checkbox)
 
-        # AMP (Automatic Mixed Precision)
-        amp_checkbox = QCheckBox()
-        amp_checkbox.setAccessibleName("amp")
-        exp_layout.addRow(QLabel("AMP (Automatic Mixed Precision):"), amp_checkbox)
-
+        # Freeze Layers
+        freeze_layers_input = QLineEdit("0")
+        freeze_layers_input.setAccessibleName("freeze")
+        self.add_advanced_field_with_tooltip(exp_layout, "Freeze Layers:",
+                                            "Freeze the first N layers of the model to fine-tune higher layers.", freeze_layers_input)
+        # Weight Decay
+        weight_decay_input = QLineEdit("0.0005")
+        weight_decay_input.setAccessibleName("weight_decay")
+        self.add_advanced_field_with_tooltip(exp_layout, "Weight Decay (L2 regularization):",
+                                            "Penalty for large model weights to prevent overfitting.", weight_decay_input)
         # Resume Training
         resume_training_checkbox = QCheckBox()
         resume_training_checkbox.setAccessibleName("resume")
@@ -267,11 +299,6 @@ class TrainingPage(QWidget):
         dropout_input.setAccessibleName("dropout")
         self.add_advanced_field_with_tooltip(exp_layout, "Dropout:",
                                             "Dropout rate for regularization, helps prevent overfitting.", dropout_input)
-
-        # Profile Speeds
-        profile_speeds_checkbox = QCheckBox()
-        profile_speeds_checkbox.setAccessibleName("profile_speeds")
-        exp_layout.addRow(QLabel("Profile Speeds:"), profile_speeds_checkbox)
 
         self.experimental_options.setLayout(exp_layout)
         return self.experimental_options
@@ -295,16 +322,21 @@ class TrainingPage(QWidget):
         layout.addWidget(widget)
 
     def start_training(self):
-        train_config = {'device': self.device_dropdown.currentData(),
+        train_config = {
+            'device': self.device_dropdown.currentData(),
+            'model': self.model_dropdown.currentText(),
             'data': self.data_input.text(),
             'epochs': int(self.epochs_input.text()),
             'imgsz': int(self.imgsz_input.text()),
             'batch': int(self.batch_input.text())
         }
-        # Collect settings dynamically from all configurable sections
-        self.collect_settings_from_layout(self.advanced_options.layout(), train_config)
-        self.collect_settings_from_layout(self.logging_options.layout(), train_config)
-        self.collect_settings_from_layout(self.experimental_options.layout(), train_config)
+        # Only collect settings from group boxes if they are checked
+        if self.advanced_options.isChecked():
+            self.collect_settings_from_layout(self.advanced_options.layout(), train_config)
+        if self.logging_options.isChecked():
+            self.collect_settings_from_layout(self.logging_options.layout(), train_config)
+        if self.experimental_options.isChecked():
+            self.collect_settings_from_layout(self.experimental_options.layout(), train_config)
 
         self.training_thread = TrainingThread(train_config)
         self.training_thread.progress.connect(self.update_progress)
@@ -323,3 +355,4 @@ class TrainingPage(QWidget):
     def on_training_finished(self):
         self.abort_btn.setEnabled(False)
         self.progress_text.append("Training finished.")
+
