@@ -8,6 +8,14 @@
 ```
 pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
 ```
+## Install via Conda/Anaconda
+```
+# ensure its executable
+chmod +x setup.sh
+# run
+./setup.sh
+```
+
 ## Run - via CMD
 ```
 noaa-ai-gui
