@@ -1,6 +1,9 @@
 ## Open Science AI Toolkit - GUI
 ### Note: In active development
 ![app](../docs/screenshot03.png)
+![app](../docs/screenshot04.png)
+![app](../docs/screenshot05.png)
+![app](../docs/screenshot06.png)
 ## Install
 ```
 pip install git+https://github.com/MichaelAkridge-NOAA/open-science-ai-toolkit.git
