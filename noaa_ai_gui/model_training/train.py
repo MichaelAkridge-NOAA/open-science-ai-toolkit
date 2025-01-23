@@ -55,9 +55,16 @@ class TrainingPage(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("YOLO Training GUI: Object Detection")
+        self.setWindowTitle("YOLO11 Training: Object Detection")
         main_layout = QVBoxLayout(self)  # Main layout for the widget
-
+        self.setStyleSheet("""
+            QToolTip {
+                background-color: #2a5298; /* Blue background */
+                color: white; /* White text */
+                border: 1px solid white;
+                border-radius: 2px; /* Slightly rounded corners */
+            }
+        """)
         # Set up the various configuration sections
         self.setup_device_section(main_layout)
         self.setup_model_section(main_layout)

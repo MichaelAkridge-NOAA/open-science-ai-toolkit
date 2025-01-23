@@ -6,3 +6,5 @@
 PyQt5
 ultralytics
 pyqtdarktheme
+PyQtWebEngine
+plotly

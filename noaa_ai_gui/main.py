@@ -134,10 +134,33 @@ class MainApp(QMainWindow):
         self.tabs.addTab(TrainingPage(), get_colored_svg_icon("./icons/gears.svg", Qt.white), "Training")
         self.tabs.addTab(DataPrepPage(), get_colored_svg_icon("./icons/images.svg", Qt.white), "Data Preparation")
         self.tabs.addTab(DatasetViewerPage(), get_colored_svg_icon("./icons/magnifying-glass.svg", Qt.white), "Dataset Viewer")
-        self.tabs.addTab(ModelEvalPage(), get_colored_svg_icon("./icons/chart-pie.svg", Qt.white), "Model Evaluation")
+        self.tabs.addTab(TrainingEvalPage(), get_colored_svg_icon("./icons/chart-line.svg", Qt.white), "Training Results Evaluation")
+        self.tabs.addTab(ModelEvalPage(), get_colored_svg_icon("./icons/chart-pie.svg", Qt.white), "Model Evaluation / Benchmarking")
         self.tabs.setIconSize(icon_size)
         self.tabs.setVisible(False)
         layout.addWidget(self.tabs)
+        # Connect tab change signal
+        self.tabs.currentChanged.connect(self.adjust_size_for_tab)
+
+    def adjust_size_for_tab(self, index):
+        # Get the text of the selected tab
+        tab_name = self.tabs.tabText(index)
+
+        # Set custom sizes for specific tabs
+        if tab_name == "Training Results Evaluation":
+            self.resize(1450, 1050)  # Match the plot size or slightly larger
+        elif tab_name == "Training":
+            self.resize(1080, 720)  # Custom size for Training tab
+        elif tab_name == "Data Preparation":
+            self.resize(1080, 720)  # Custom size for Data Preparation tab
+        elif tab_name == "Dataset Viewer":
+            self.resize(1450, 1050)  # Custom size for Dataset Viewer tab
+        elif tab_name == "Model Evaluation / Benchmarking":
+            self.resize(1080, 720)  # Custom size for Model Evaluation tab
+        else:
+            self.resize(1080, 720)  # Default size for other tabs
+
+
     def navigateTo(self, index):
         self.introPage.setVisible(False)
         self.tabs.setVisible(True)
@@ -150,6 +173,7 @@ class IntroPage(QWidget):
     
     def __init__(self, main_app):
         super().__init__()
+
         layout = QVBoxLayout()
         welcome_text = """
         <h1>Welcome to the Open Science AI Toolbox!</h1>
@@ -184,16 +208,23 @@ class IntroPage(QWidget):
         btn_dataset_viewer.setFont(font_buttons)
         btn_dataset_viewer.clicked.connect(lambda: main_app.navigateTo(2))
 
-        btn_model_eval = QPushButton("Model Evaluation")
+        btn_train_eval = QPushButton("Training Results Eval")
+        btn_train_eval.setIcon(get_colored_svg_icon("./icons/chart-line.svg", Qt.white))
+        btn_train_eval.setIconSize(icon_size)
+        btn_train_eval.setFont(font_buttons)
+        btn_train_eval.clicked.connect(lambda: main_app.navigateTo(3))
+
+        btn_model_eval = QPushButton("Model Eval")
         btn_model_eval.setIcon(get_colored_svg_icon("./icons/chart-pie.svg", Qt.white))
         btn_model_eval.setIconSize(icon_size)
         btn_model_eval.setFont(font_buttons)
-        btn_model_eval.clicked.connect(lambda: main_app.navigateTo(3))
+        btn_model_eval.clicked.connect(lambda: main_app.navigateTo(4))
 
         button_layout = QHBoxLayout()
         button_layout.addWidget(btn_training)
         button_layout.addWidget(btn_data_prep)
         button_layout.addWidget(btn_dataset_viewer)
+        button_layout.addWidget(btn_train_eval)
         button_layout.addWidget(btn_model_eval)
 
         layout.addLayout(button_layout)
@@ -204,11 +235,13 @@ if __name__ == "__main__" and __package__ is None:
     from data_prep.data_prep import DataPrepPage
     from dataset_viewer.dataset_viewer import DatasetViewerPage
     from model_evaluation.model_eval import ModelEvalPage
+    from model_train_eval import TrainingEvalPage
 else:
     from .model_training.train import TrainingPage
     from .data_prep.data_prep import DataPrepPage
     from .dataset_viewer.dataset_viewer import DatasetViewerPage
     from .model_evaluation.model_eval import ModelEvalPage
+    from .model_train_eval import TrainingEvalPage
 
 def main():
     app = QApplication(sys.argv)
