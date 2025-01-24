@@ -12,6 +12,28 @@ echo "This script will set up your Conda environment and optionally install CUDA
 echo "===================================================================================="
 echo ""
 
+# Step 0: Check for required system dependencies
+echo "STEP 0: Checking for required system dependencies..."
+echo "===================================================================================="
+missing_deps=()
+for dep in libxcb-xinerama0 libxcb1 libx11-xcb1 libxcb-glx0 libxcb-keysyms1; do
+    if ! dpkg -l | grep -q "$dep"; then
+        missing_deps+=("$dep")
+    fi
+done
+
+if [ ${#missing_deps[@]} -gt 0 ]; then
+    echo "Missing dependencies detected: ${missing_deps[*]}"
+    echo "Installing missing dependencies..."
+    sudo apt-get update
+    sudo apt-get install -y "${missing_deps[@]}"
+    echo "Dependencies installed successfully."
+else
+    echo "All required dependencies are already installed."
+fi
+
+# Step 1: Create the Conda environment
+echo ""
 # Step 1: Create the Conda environment
 echo "STEP 1: Creating Conda environment..."
 echo "===================================================================================="
