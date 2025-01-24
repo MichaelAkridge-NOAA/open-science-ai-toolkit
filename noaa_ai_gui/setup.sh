@@ -15,21 +15,26 @@ echo ""
 # Step 0: Check for required system dependencies
 echo "STEP 0: Checking for required system dependencies..."
 echo "===================================================================================="
-missing_deps=()
-for dep in libxcb-xinerama0 libxcb1 libx11-xcb1 libxcb-glx0 libxcb-keysyms1; do
-    if ! dpkg -l | grep -q "$dep"; then
-        missing_deps+=("$dep")
-    fi
-done
 
-if [ ${#missing_deps[@]} -gt 0 ]; then
-    echo "Missing dependencies detected: ${missing_deps[*]}"
-    echo "Installing missing dependencies..."
+OS=$(uname)
+echo "Detected OS: $OS"
+if [ "$OS" == "Linux" ]; then
+    echo "Installing Linux dependencies..."
     sudo apt-get update
-    sudo apt-get install -y "${missing_deps[@]}"
-    echo "Dependencies installed successfully."
+    sudo apt-get install -y libxcb-xinerama0 libxcb1 libx11-xcb1 libxcb-glx0 libxcb-keysyms1
+elif [ "$OS" == "Darwin" ]; then
+    echo "Installing macOS dependencies..."
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew not found. Please install Homebrew first: https://brew.sh/"
+        exit 1
+    fi
+    brew update
+    brew install xcb qt
+elif [[ "$OS" == CYGWIN* || "$OS" == MINGW* || "$OS" == MSYS* ]]; then
+    echo "Detected Windows."
 else
-    echo "All required dependencies are already installed."
+    echo "Unknown platform."
+    exit 1
 fi
 
 # Step 1: Create the Conda environment
