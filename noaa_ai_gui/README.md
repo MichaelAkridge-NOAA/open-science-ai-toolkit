@@ -36,7 +36,7 @@ noaa-ai-gui
 - Missing Dataset Config: Ensure the data path in your YAML file is correct.
 - Unknown: Check the Training Logs. If training fails, check training_log.txt for detailed error messages.
 
-## Example Dataset Yaml: 
+## Example Dataset: 
 ### urchin_dataset.yaml
 ```
 train: images/train
@@ -45,6 +45,27 @@ test: images/test
 
 nc: 1
 names: ['urchin']
+```
+### Folders
+```
+images/
+-- test/
+     example_image_name01.jpg
+     example_image_name02.jpg
+     example_image_name03.jpg
+-- train/
+     ...
+-- val/
+     ...
+labels/
+-- test/
+     example_image_name01.txt
+     example_image_name02.txt
+     example_image_name03.txt
+-- train/
+     ...
+-- val/
+     ...
 ```
 
 # credits - icons
