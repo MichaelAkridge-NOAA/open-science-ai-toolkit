@@ -13,7 +13,9 @@ setup(
     install_requires=[
         'PyQt5', 
         'ultralytics',
-        'pyqtdarktheme'
+        'pyqtdarktheme',
+        'PyQtWebEngine',
+        'plotly'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.10",
