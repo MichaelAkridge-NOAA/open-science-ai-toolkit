@@ -2,6 +2,7 @@
 ### Note: In active development
 ![app](../docs/screenshot03.png)
 ![app](../docs/screenshot07.png)
+![app](../docs/screenshot08.png)
 ![app](../docs/SFM_mosaic_object_detection.gif)
 ![app](../docs/screenshot04.png)
 ![app](../docs/screenshot05.png)
