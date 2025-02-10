@@ -178,9 +178,13 @@ A collection of Jupyter notebooks for different stages of the AI/ML pipeline:
 
 
 ### TODO
-- multi-platform checks and exe
+- add in data prep and exploratory data analysis (EDA) tools
+- add in exe
 - plots and tables for map50 and map95 along with what epoch those values were achieved.
-- add in more plots like in train/runs folder
+- more QA/QC outputs
+- add in NODD tools for streamlined process for moving imagery and annotations to NODD
+- Ability to compare manual(ground truth) and ML/automated predicitons(annotations) to report summary stats outputs (e.g.  false-positive rate, percent agreement, and coefficient of variation)
+   - require test dataset 
 
 ```
 conda env export > environment.yml
