@@ -1,5 +1,10 @@
 # Open Science AI Toolkit
 Open source suite of tools, workflows, and processes designed to accelerate Open Science AI/ML development.
+Related Tools, Models and Links:
+- https://huggingface.co/akridge
+- https://github.com/MichaelAkridge-NOAA/open-science-ai-showcase
+- https://github.com/MichaelAkridge-NOAA/ai4me-cookbook
+
 [![app](./docs/screenshot03.png)](./noaa_ai_gui)
 
 # Table of Contents
